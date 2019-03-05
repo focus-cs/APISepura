@@ -104,7 +104,7 @@
 
   <target name="copy-resources" description="copy Java resources like xml and properties files">
     <copy todir="${dist.dir}/config">
-      <fileset dir="${src.dir}">
+      <fileset dir="${basedir}/config">
         <include name="**/*.properties" />
       </fileset>
     </copy>
