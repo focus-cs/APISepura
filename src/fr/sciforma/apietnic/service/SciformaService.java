@@ -30,13 +30,13 @@ import java.util.Optional;
 @PropertySource("file:${user.dir}/config/application.properties")
 public class SciformaService {
 
-    @Value("${url}")
+    @Value("${sciforma.url}")
     private String url;
-    @Value("${context}")
+    @Value("${sciforma.context}")
     private String context;
-    @Value("${username}")
+    @Value("${sciforma.username}")
     private String username;
-    @Value("${password}")
+    @Value("${sciforma.password}")
     private String password;
 
     private Session session;
@@ -75,12 +75,12 @@ public class SciformaService {
 
     }
 
-    public List<Project> getProjects(int version, int access) {
+    public List<Project> getProjects() {
 
         if (session.isLoggedIn()) {
 
             try {
-                return session.getProjectList(version, access);
+                return session.getProjectList(Project.VERSION_WORKING, Project.READWRITE_ACCESS);
             } catch (PSException e) {
                 Logger.error("Failed to retrieve project list", e);
             }
