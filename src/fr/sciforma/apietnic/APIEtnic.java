@@ -56,9 +56,9 @@ public class APIEtnic {
 
             if (sciformaService.createConnection()) {
 
-                List<Project> projectList = sciformaService.getProjectList(Project.VERSION_WORKING, Project.READWRITE_ACCESS);
+                List<Project> projectList = sciformaService.getProjects(Project.VERSION_WORKING, Project.READWRITE_ACCESS);
 
-                List<SciformaField> fieldsToExtract = extractorFactory.getFields();
+                List<SciformaField> projectFieldsToExtract = extractorFactory.getProjectFields();
 
                 for (Project project : projectList) {
 
@@ -68,7 +68,7 @@ public class APIEtnic {
 
                         StringJoiner csvLine = new StringJoiner("|");
 
-                        for (SciformaField sciformaField : fieldsToExtract) {
+                        for (SciformaField sciformaField : projectFieldsToExtract) {
 
                             switch (sciformaField.getType()) {
                                 case DECIMAL:
