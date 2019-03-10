@@ -1,28 +1,26 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.User;
+import com.sciforma.psnext.api.Organization;
 import fr.sciforma.apietnic.business.FieldType;
 import fr.sciforma.apietnic.business.SciformaField;
 import fr.sciforma.apietnic.business.extractor.Extractor;
-import fr.sciforma.apietnic.business.factory.UserExtractorFactory;
+import fr.sciforma.apietnic.business.factory.OrganizationExtractorFactory;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.util.*;
 
 @Component
-public class UserProcessor extends AbstractProcessor {
+public class OrganizationProcessor extends AbstractProcessor {
 
     @Autowired
-    UserExtractorFactory extractorFactory;
+    OrganizationExtractorFactory extractorFactory;
 
-    private Map<FieldType, Extractor<User>> extractorMap = new EnumMap<>(FieldType.class);
+    private Map<FieldType, Extractor<Organization>> extractorMap = new EnumMap<>(FieldType.class);
+    private List<SciformaField> userFieldsToExtract;
 
     @PostConstruct
     public void postConstruct() {
@@ -46,19 +44,37 @@ public class UserProcessor extends AbstractProcessor {
     @Override
     public void process(SciformaService sciformaService) {
 
-        List<SciformaField> userFieldsToExtract = extractorFactory.getFields();
+        userFieldsToExtract = extractorFactory.getFields();
 
-        for (User user : sciformaService.getUsers()) {
+        Optional<Organization> organizations = sciformaService.getOrganizations();
+
+        organizations.ifPresent(this::parseOrganizations);
+
+    }
+
+    private void parseOrganizations(Organization root) {
+
+        List<Organization> children = root.getChildren();
+
+        if (children == null || children.isEmpty()) {
 
             StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
             for (SciformaField sciformaField : userFieldsToExtract) {
 
-                extractorMap.get(sciformaField.getType()).extract(user, sciformaField.getName()).ifPresent(csvLine::add);
+                extractorMap.get(sciformaField.getType()).extract(root, sciformaField.getName()).ifPresent(csvLine::add);
 
             }
 
             Logger.info(csvLine.toString());
+
+        } else {
+
+            for (Organization child : children) {
+
+                parseOrganizations(child);
+
+            }
         }
 
     }

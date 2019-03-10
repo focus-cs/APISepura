@@ -1,9 +1,12 @@
 package fr.sciforma.apietnic.business.processor;
 
+import com.sciforma.psnext.api.JobClassification;
+import com.sciforma.psnext.api.PSException;
 import com.sciforma.psnext.api.User;
 import fr.sciforma.apietnic.business.FieldType;
 import fr.sciforma.apietnic.business.SciformaField;
 import fr.sciforma.apietnic.business.extractor.Extractor;
+import fr.sciforma.apietnic.business.factory.JobClassificationExtractorFactory;
 import fr.sciforma.apietnic.business.factory.UserExtractorFactory;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
@@ -11,18 +14,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.util.*;
 
 @Component
-public class UserProcessor extends AbstractProcessor {
+public class JobClassificationProcessor extends AbstractProcessor {
 
     @Autowired
-    UserExtractorFactory extractorFactory;
+    JobClassificationExtractorFactory extractorFactory;
 
-    private Map<FieldType, Extractor<User>> extractorMap = new EnumMap<>(FieldType.class);
+    private Map<FieldType, Extractor<JobClassification>> extractorMap = new EnumMap<>(FieldType.class);
+    private List<SciformaField> userFieldsToExtract;
 
     @PostConstruct
     public void postConstruct() {
@@ -46,19 +47,37 @@ public class UserProcessor extends AbstractProcessor {
     @Override
     public void process(SciformaService sciformaService) {
 
-        List<SciformaField> userFieldsToExtract = extractorFactory.getFields();
+        userFieldsToExtract = extractorFactory.getFields();
 
-        for (User user : sciformaService.getUsers()) {
+        Optional<JobClassification> jobClassifications = sciformaService.getJobClassifications();
+
+        jobClassifications.ifPresent(this::parseJobClassifications);
+
+    }
+
+    private void parseJobClassifications(JobClassification root) {
+
+        List<JobClassification> children = root.getChildren();
+
+        if (children == null || children.isEmpty()) {
 
             StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
             for (SciformaField sciformaField : userFieldsToExtract) {
 
-                extractorMap.get(sciformaField.getType()).extract(user, sciformaField.getName()).ifPresent(csvLine::add);
+                extractorMap.get(sciformaField.getType()).extract(root, sciformaField.getName()).ifPresent(csvLine::add);
 
             }
 
             Logger.info(csvLine.toString());
+
+        } else {
+
+            for (JobClassification child : children) {
+
+                parseJobClassifications(child);
+
+            }
         }
 
     }

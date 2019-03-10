@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 @Component
-public class UserProcessor extends AbstractProcessor {
+public class LaborAssignementProcessor extends AbstractProcessor {
 
     @Autowired
     UserExtractorFactory extractorFactory;

@@ -1,7 +1,9 @@
 package fr.sciforma.apietnic.business.extractor;
 
-import com.sciforma.psnext.api.PSException;
+import com.sciforma.psnext.api.FieldAccessor;
 
-public interface Extractor<P> {
-    String extract(P psObject, String fieldName) throws PSException;
+import java.util.Optional;
+
+public interface Extractor<P extends FieldAccessor> {
+    Optional<String> extract(P fieldAccessor, String fieldName);
 }

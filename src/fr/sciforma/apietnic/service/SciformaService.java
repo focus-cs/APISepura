@@ -163,41 +163,65 @@ public class SciformaService {
 
     }
 
-    public Optional<JobClassification> getJobClassifications() throws PSException {
-        SystemData systemData = session.getSystemData(SystemData.JOB_CLASSIFICATIONS);
+    public Optional<JobClassification> getJobClassifications() {
 
-        if (systemData instanceof JobClassification) {
-            return Optional.of((JobClassification) systemData);
+        try {
+            SystemData systemData = session.getSystemData(SystemData.JOB_CLASSIFICATIONS);
+
+            if (systemData instanceof JobClassification) {
+                return Optional.of((JobClassification) systemData);
+            }
+
+        } catch (PSException e) {
+            Logger.error(e, "Failed to retrieve job classifications");
         }
 
         return Optional.empty();
     }
 
-    public Optional<Organization> getOrganizations() throws PSException {
-        SystemData systemData = session.getSystemData(SystemData.ORGANIZATIONS);
+    public Optional<Organization> getOrganizations() {
 
-        if (systemData instanceof Organization) {
-            return Optional.of((Organization) systemData);
+        try {
+            SystemData systemData = session.getSystemData(SystemData.ORGANIZATIONS);
+
+            if (systemData instanceof Organization) {
+                return Optional.of((Organization) systemData);
+            }
+
+        } catch (PSException e) {
+            Logger.error(e, "Failed to retrieve organizations");
         }
 
         return Optional.empty();
     }
 
-    public Optional<PortfolioFolder> getPortfolioFolders() throws PSException {
-        SystemData systemData = session.getSystemData(SystemData.PORTFOLIO_FOLDERS);
+    public Optional<PortfolioFolder> getPortfolioFolders() {
 
-        if (systemData instanceof PortfolioFolder) {
-            return Optional.of((PortfolioFolder) systemData);
+        try {
+            SystemData systemData = session.getSystemData(SystemData.PORTFOLIO_FOLDERS);
+
+            if (systemData instanceof PortfolioFolder) {
+                return Optional.of((PortfolioFolder) systemData);
+            }
+
+        } catch (PSException e) {
+            Logger.error(e, "Failed to retrieve portfolio folders");
         }
 
         return Optional.empty();
     }
 
-    public Optional<Skill> getSkills() throws PSException {
-        SystemData systemData = session.getSystemData(SystemData.SKILLS);
+    public Optional<Skill> getSkills() {
+        try {
 
-        if (systemData instanceof Skill) {
-            return Optional.of((Skill) systemData);
+            SystemData systemData = session.getSystemData(SystemData.SKILLS);
+
+            if (systemData instanceof Skill) {
+                return Optional.of((Skill) systemData);
+            }
+
+        } catch (PSException e) {
+            Logger.error(e, "Failed to retrieve skills");
         }
 
         return Optional.empty();

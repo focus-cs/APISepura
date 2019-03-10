@@ -6,7 +6,6 @@ import com.sciforma.psnext.api.Project;
 import fr.sciforma.apietnic.business.FieldType;
 import fr.sciforma.apietnic.business.SciformaField;
 import fr.sciforma.apietnic.business.extractor.Extractor;
-import fr.sciforma.apietnic.business.extractor.project.*;
 import fr.sciforma.apietnic.business.factory.ProjectExtractorFactory;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
@@ -24,18 +23,6 @@ public class ProjectProcessor extends AbstractProcessor {
 
     @Autowired
     ProjectExtractorFactory projectExtractorFactory;
-    @Autowired
-    ProjectStringExtractor stringExtractor;
-    @Autowired
-    ProjectDecimalExtractor decimalExtractor;
-    @Autowired
-    ProjectBooleanExtractor booleanExtractor;
-    @Autowired
-    ProjectDateExtractor dateExtractor;
-    @Autowired
-    ProjectIntegerExtractor integerExtractor;
-    @Autowired
-    ProjectListExtractor listExtractor;
 
     private Map<FieldType, Extractor<Project>> extractorMap = new EnumMap<>(FieldType.class);
 
@@ -70,13 +57,13 @@ public class ProjectProcessor extends AbstractProcessor {
 
                 project.open(false);
 
-                Logger.info("Extracting data from project : " + project.getStringField("Name"));
+                Logger.info("Extracting data from project : " + extractorMap.get(FieldType.STRING).extract(project, "Name"));
 
                 StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
                 for (SciformaField sciformaField : projectFieldsToExtract) {
 
-                    csvLine.add(extractorMap.get(sciformaField.getType()).extract(project, sciformaField.getName()));
+                    extractorMap.get(sciformaField.getType()).extract(project, sciformaField.getName()).ifPresent(csvLine::add);
 
                 }
 

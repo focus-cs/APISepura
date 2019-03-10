@@ -20,7 +20,7 @@ public class PortfolioExtractorFactory {
         fields = new ArrayList<>();
         fields.add(SciformaField.builder().name("Description").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Internal ID").type(FieldType.DECIMAL).build());
-        fields.add(SciformaField.builder().name("Managers").type(FieldType.USER).build());
+        fields.add(SciformaField.builder().name("Managers").type(FieldType.LIST).build());
         fields.add(SciformaField.builder().name("Name").type(FieldType.STRING).build());
     }
 }
