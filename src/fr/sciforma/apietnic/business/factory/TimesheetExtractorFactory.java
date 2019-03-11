@@ -1,5 +1,6 @@
 package fr.sciforma.apietnic.business.factory;
 
+import com.sciforma.psnext.api.Timesheet;
 import fr.sciforma.apietnic.business.FieldType;
 import fr.sciforma.apietnic.business.SciformaField;
 import lombok.Getter;
@@ -11,7 +12,7 @@ import java.util.List;
 
 @Component
 @Getter
-public class TimesheetExtractorFactory {
+public class TimesheetExtractorFactory implements ExtractorFactory<Timesheet> {
 
     private List<SciformaField> fields;
 

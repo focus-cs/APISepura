@@ -63,7 +63,7 @@ public class APIEtnic {
             if (sciformaService.createConnection()) {
 
 //                projectProcessor.process(sciformaService);
-//                userProcessor.process(sciformaService);
+                userProcessor.process(sciformaService);
                 resourceProcessor.process(sciformaService);
                 jobClassificationProcessor.process(sciformaService);
                 organizationProcessor.process(sciformaService);

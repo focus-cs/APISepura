@@ -8,19 +8,14 @@ import fr.sciforma.apietnic.business.factory.UserExtractorFactory;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.util.*;
 
 @Component
-public class LaborAssignementProcessor extends AbstractProcessor {
-
-    @Autowired
-    UserExtractorFactory extractorFactory;
+public class LaborAssignementProcessor extends AbstractProcessor<User> {
 
     private Map<FieldType, Extractor<User>> extractorMap = new EnumMap<>(FieldType.class);
 
@@ -46,20 +41,29 @@ public class LaborAssignementProcessor extends AbstractProcessor {
     @Override
     public void process(SciformaService sciformaService) {
 
-        List<SciformaField> userFieldsToExtract = extractorFactory.getFields();
+        fieldsToExtract = extractorFactory.getFields();
+
+        csvLines = new ArrayList<>();
 
         for (User user : sciformaService.getUsers()) {
 
             StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
-            for (SciformaField sciformaField : userFieldsToExtract) {
+            for (SciformaField sciformaField : fieldsToExtract) {
 
                 extractorMap.get(sciformaField.getType()).extract(user, sciformaField.getName()).ifPresent(csvLine::add);
 
             }
 
-            Logger.info(csvLine.toString());
+            csvLines.add(csvLine.toString());
         }
 
+        toCsv();
+
+    }
+
+    @Override
+    protected String getFilename() {
+        return null;
     }
 }

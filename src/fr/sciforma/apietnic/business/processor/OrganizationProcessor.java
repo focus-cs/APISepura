@@ -1,55 +1,46 @@
 package fr.sciforma.apietnic.business.processor;
 
 import com.sciforma.psnext.api.Organization;
-import fr.sciforma.apietnic.business.FieldType;
 import fr.sciforma.apietnic.business.SciformaField;
-import fr.sciforma.apietnic.business.extractor.Extractor;
 import fr.sciforma.apietnic.business.factory.OrganizationExtractorFactory;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.StringJoiner;
 
 @Component
-public class OrganizationProcessor extends AbstractProcessor {
+public class OrganizationProcessor extends AbstractProcessor<Organization> {
 
-    @Autowired
-    OrganizationExtractorFactory extractorFactory;
-
-    private Map<FieldType, Extractor<Organization>> extractorMap = new EnumMap<>(FieldType.class);
-    private List<SciformaField> userFieldsToExtract;
-
-    @PostConstruct
-    public void postConstruct() {
-        extractorMap.putIfAbsent(FieldType.STRING, stringExtractor);
-        extractorMap.putIfAbsent(FieldType.DECIMAL, decimalExtractor);
-        extractorMap.putIfAbsent(FieldType.BOOLEAN, booleanExtractor);
-        extractorMap.putIfAbsent(FieldType.COST, decimalExtractor);
-        extractorMap.putIfAbsent(FieldType.EFFORT, decimalExtractor);
-        extractorMap.putIfAbsent(FieldType.DATE, dateExtractor);
-        extractorMap.putIfAbsent(FieldType.FORMULA, stringExtractor);
-        extractorMap.putIfAbsent(FieldType.DURATION, decimalExtractor);
-        extractorMap.putIfAbsent(FieldType.INTEGER, integerExtractor);
-        extractorMap.putIfAbsent(FieldType.USER, stringExtractor);
-        extractorMap.putIfAbsent(FieldType.RESOURCE, stringExtractor);
-        extractorMap.putIfAbsent(FieldType.URL, stringExtractor);
-        extractorMap.putIfAbsent(FieldType.CALENDAR, stringExtractor);
-        extractorMap.putIfAbsent(FieldType.EFFORT_RATE, stringExtractor);
-        extractorMap.putIfAbsent(FieldType.LIST, listExtractor);
-    }
+    @Value("${filename.organizations}")
+    private String filename;
 
     @Override
     public void process(SciformaService sciformaService) {
 
-        userFieldsToExtract = extractorFactory.getFields();
+        Logger.info("Processing file " + filename);
+
+        fieldsToExtract = extractorFactory.getFields();
+        csvLines = new ArrayList<>();
 
         Optional<Organization> organizations = sciformaService.getOrganizations();
 
         organizations.ifPresent(this::parseOrganizations);
 
+        toCsv();
+
+        Logger.info("File " + filename + " has been processed successfully");
+
+    }
+
+    @Override
+    protected String getFilename() {
+        return filename;
     }
 
     private void parseOrganizations(Organization root) {
@@ -60,13 +51,13 @@ public class OrganizationProcessor extends AbstractProcessor {
 
             StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
-            for (SciformaField sciformaField : userFieldsToExtract) {
+            for (SciformaField sciformaField : fieldsToExtract) {
 
                 extractorMap.get(sciformaField.getType()).extract(root, sciformaField.getName()).ifPresent(csvLine::add);
 
             }
 
-            Logger.info(csvLine.toString());
+            csvLines.add(csvLine.toString());
 
         } else {
 

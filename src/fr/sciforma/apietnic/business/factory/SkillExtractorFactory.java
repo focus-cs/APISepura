@@ -1,5 +1,7 @@
 package fr.sciforma.apietnic.business.factory;
 
+import com.sciforma.psnext.api.Skill;
+import com.sciforma.psnext.api.User;
 import fr.sciforma.apietnic.business.FieldType;
 import fr.sciforma.apietnic.business.SciformaField;
 import lombok.Getter;
@@ -11,7 +13,7 @@ import java.util.List;
 
 @Component
 @Getter
-public class SkillExtractorFactory {
+public class SkillExtractorFactory implements ExtractorFactory<Skill> {
 
     private List<SciformaField> fields;
 

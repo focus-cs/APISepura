@@ -8,14 +8,16 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
-public class StringExtractor<T extends FieldAccessor> implements Extractor<T> {
+public class CalendarExtractor<T extends FieldAccessor> implements Extractor<T> {
 
     @Override
     public Optional<String> extract(T fieldAccessor, String fieldName) {
 
         try {
 
-            return Optional.of(fieldAccessor.getStringField(fieldName).replaceAll("\\r\\n|\\r|\\n", " "));
+            Object value = fieldAccessor.getValue(fieldName);
+            Logger.info(value.toString());
+//            return Optional.of(fieldAccessor.get(fieldName).replaceAll("\\r\\n|\\r|\\n", " "));
 
         } catch (PSException e) {
             Logger.error(e, "Failed to retrieve string value from field " + fieldName);

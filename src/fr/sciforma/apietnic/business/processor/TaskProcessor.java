@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
-public class TaskProcessor extends AbstractProcessor {
+public class TaskProcessor extends AbstractProcessor<Task> {
 
     @Autowired
     UserExtractorFactory extractorFactory;
@@ -58,5 +58,10 @@ public class TaskProcessor extends AbstractProcessor {
             }
         }
 
+    }
+
+    @Override
+    protected String getFilename() {
+        return null;
     }
 }
