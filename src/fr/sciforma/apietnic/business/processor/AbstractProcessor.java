@@ -24,4 +24,6 @@ public abstract class AbstractProcessor {
     protected ListExtractor listExtractor;
 
     public abstract void process(SciformaService sciformaService);
+
+//    protected abstract void toCsv();
 }
