@@ -1,12 +1,10 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.LockException;
-import com.sciforma.psnext.api.PSException;
-import com.sciforma.psnext.api.Project;
+import com.sciforma.psnext.api.Resource;
 import fr.sciforma.apietnic.business.FieldType;
 import fr.sciforma.apietnic.business.SciformaField;
 import fr.sciforma.apietnic.business.extractor.Extractor;
-import fr.sciforma.apietnic.business.factory.ProjectExtractorFactory;
+import fr.sciforma.apietnic.business.factory.UserExtractorFactory;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +17,12 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 @Component
-public class ProjectProcessor extends AbstractProcessor {
+public class ResourceProcessor extends AbstractProcessor {
 
     @Autowired
-    ProjectExtractorFactory projectExtractorFactory;
+    UserExtractorFactory extractorFactory;
 
-    private Map<FieldType, Extractor<Project>> extractorMap = new EnumMap<>(FieldType.class);
+    private Map<FieldType, Extractor<Resource>> extractorMap = new EnumMap<>(FieldType.class);
 
     @PostConstruct
     public void postConstruct() {
@@ -47,45 +45,21 @@ public class ProjectProcessor extends AbstractProcessor {
 
     @Override
     public void process(SciformaService sciformaService) {
-        List<Project> projectList = sciformaService.getProjects();
 
-        List<SciformaField> projectFieldsToExtract = projectExtractorFactory.getFields();
+        List<SciformaField> userFieldsToExtract = extractorFactory.getFields();
 
-        for (Project project : projectList) {
+        for (Resource resource : sciformaService.getWorkingResources()) {
 
-            try {
+            StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
-                project.open(true);
+            for (SciformaField sciformaField : userFieldsToExtract) {
 
-                Logger.info("Extracting data from project : " + extractorMap.get(FieldType.STRING).extract(project, "Name"));
-
-                StringJoiner csvLine = new StringJoiner(csvDelimiter);
-
-                for (SciformaField sciformaField : projectFieldsToExtract) {
-
-                    extractorMap.get(sciformaField.getType()).extract(project, sciformaField.getName()).ifPresent(csvLine::add);
-
-                }
-
-                Logger.info(csvLine.toString());
-
-                //TODO: remove this (for testing purpose)
-                break;
-
-            } catch (LockException e) {
-                Logger.error("Project is locked by " + e.getLockingUser());
-            } catch (PSException e) {
-                Logger.error(e);
-            } finally {
-
-                try {
-                    project.close();
-                } catch (PSException e) {
-                    Logger.error("Failed to close project");
-                }
+                extractorMap.get(sciformaField.getType()).extract(resource, sciformaField.getName()).ifPresent(csvLine::add);
 
             }
 
+            Logger.info(csvLine.toString());
         }
+
     }
 }

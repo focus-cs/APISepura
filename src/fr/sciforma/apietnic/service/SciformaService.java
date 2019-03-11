@@ -1,6 +1,7 @@
 package fr.sciforma.apietnic.service;
 
 import com.sciforma.psnext.api.JobClassification;
+import com.sciforma.psnext.api.LockException;
 import com.sciforma.psnext.api.Organization;
 import com.sciforma.psnext.api.PSException;
 import com.sciforma.psnext.api.PortfolioFolder;
@@ -9,6 +10,7 @@ import com.sciforma.psnext.api.Resource;
 import com.sciforma.psnext.api.Session;
 import com.sciforma.psnext.api.Skill;
 import com.sciforma.psnext.api.SystemData;
+import com.sciforma.psnext.api.TaskOutlineList;
 import com.sciforma.psnext.api.Timesheet;
 import com.sciforma.psnext.api.User;
 import lombok.Getter;
@@ -53,7 +55,7 @@ public class SciformaService {
             return true;
 
         } catch (PSException e) {
-            Logger.error("Failed to connect to sciforma : " + e.getMessage(), e);
+            Logger.error(e, "Failed to connect to sciforma : " + e.getMessage());
         }
 
         return false;
@@ -70,7 +72,7 @@ public class SciformaService {
             }
 
         } catch (PSException e) {
-            Logger.error("Failed to logout", e);
+            Logger.error(e, "Failed to logout");
         }
 
     }
@@ -82,7 +84,7 @@ public class SciformaService {
             try {
                 return session.getProjectList(Project.VERSION_WORKING, Project.READWRITE_ACCESS);
             } catch (PSException e) {
-                Logger.error("Failed to retrieve project list", e);
+                Logger.error(e, "Failed to retrieve project list");
             }
 
         } else {
@@ -93,18 +95,64 @@ public class SciformaService {
 
     }
 
-    public List<Resource> getPublishedResourceInfos() {
+    public Optional<TaskOutlineList> getTasksForProject(Project project) {
+
+        try {
+
+            project.open(true);
+
+            TaskOutlineList taskOutlineList = project.getTaskOutlineList();
+
+            return Optional.of(taskOutlineList);
+
+        } catch (LockException e) {
+            Logger.error("Project is locked by " + e.getLockingUser());
+        } catch (PSException e) {
+            Logger.error(e);
+        } finally {
+
+            try {
+                project.close();
+            } catch (PSException e) {
+                Logger.error("Failed to close project");
+            }
+
+        }
+
+        return Optional.empty();
+
+    }
+
+    public List<Resource> getPublishedResources() {
 
         if (session.isLoggedIn()) {
 
             try {
                 return session.getPublishedResourceList();
             } catch (PSException e) {
-                Logger.error("Failed to retrieve published resource list", e);
+                Logger.error(e, "Failed to retrieve published resource list");
             }
 
         } else {
             Logger.error("You must be logged in to retrieve published resource list");
+        }
+
+        return new ArrayList<>();
+
+    }
+
+    public List<Resource> getWorkingResources() {
+
+        if (session.isLoggedIn()) {
+
+            try {
+                return session.getWorkingResourceList();
+            } catch (PSException e) {
+                Logger.error(e, "Failed to retrieve working resource list");
+            }
+
+        } else {
+            Logger.error("You must be logged in to retrieve working resource list");
         }
 
         return new ArrayList<>();
@@ -116,9 +164,9 @@ public class SciformaService {
         if (session.isLoggedIn()) {
 
             try {
-                session.getTimesheet(resource, date);
+                return Optional.of(session.getTimesheet(resource, date));
             } catch (PSException e) {
-                Logger.error("Failed to retrieve timesheet for resource at date " + date, e);
+                Logger.error(e, "Failed to retrieve timesheet for resource at date " + date);
             }
 
         } else {
@@ -133,9 +181,9 @@ public class SciformaService {
         if (session.isLoggedIn()) {
 
             try {
-                session.getTimesheet(resource, from, to);
+                return Optional.of(session.getTimesheet(resource, from, to));
             } catch (PSException e) {
-                Logger.error("Failed to retrieve timesheet for resource from " + from + " to " + to, e);
+                Logger.error(e, "Failed to retrieve timesheet for resource from " + from + " to " + to);
             }
 
         } else {
@@ -152,7 +200,7 @@ public class SciformaService {
             try {
                 return session.getUserList();
             } catch (PSException e) {
-                Logger.error("Failed to retrieve user list", e);
+                Logger.error(e, "Failed to retrieve user list");
             }
 
         } else {

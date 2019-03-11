@@ -1,6 +1,12 @@
 package fr.sciforma.apietnic;
 
-import fr.sciforma.apietnic.business.processor.*;
+import fr.sciforma.apietnic.business.processor.JobClassificationProcessor;
+import fr.sciforma.apietnic.business.processor.OrganizationProcessor;
+import fr.sciforma.apietnic.business.processor.PortfolioFolderProcessor;
+import fr.sciforma.apietnic.business.processor.ProjectProcessor;
+import fr.sciforma.apietnic.business.processor.ResourceProcessor;
+import fr.sciforma.apietnic.business.processor.SkillProcessor;
+import fr.sciforma.apietnic.business.processor.UserProcessor;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +28,8 @@ public class APIEtnic {
     @Autowired
     UserProcessor userProcessor;
     @Autowired
+    ResourceProcessor resourceProcessor;
+    @Autowired
     JobClassificationProcessor jobClassificationProcessor;
     @Autowired
     OrganizationProcessor organizationProcessor;
@@ -34,7 +42,7 @@ public class APIEtnic {
     public static void main(String[] args) {
 
         ApplicationContext context = new AnnotationConfigApplicationContext(APIEtnic.class);
-        APIEtnic api = context.getBean(APIEtnic .class);
+        APIEtnic api = context.getBean(APIEtnic.class);
 
         try {
 
@@ -56,6 +64,7 @@ public class APIEtnic {
 
 //                projectProcessor.process(sciformaService);
 //                userProcessor.process(sciformaService);
+                resourceProcessor.process(sciformaService);
                 jobClassificationProcessor.process(sciformaService);
                 organizationProcessor.process(sciformaService);
                 portfolioFolderProcessor.process(sciformaService);

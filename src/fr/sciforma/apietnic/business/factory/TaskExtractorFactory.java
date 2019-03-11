@@ -26,7 +26,6 @@ public class TaskExtractorFactory {
         fields.add(SciformaField.builder().name("%Ecart prévision").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("Y_Act__externe").type(FieldType.BOOLEAN).build());
         fields.add(SciformaField.builder().name("Closed").type(FieldType.BOOLEAN).build());
-        fields.add(SciformaField.builder().name("ACWP").type(FieldType.COST).build());
         fields.add(SciformaField.builder().name("Analyse avancement").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Analyse budget").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Avancement réel").type(FieldType.DECIMAL).build());
@@ -81,8 +80,6 @@ public class TaskExtractorFactory {
         fields.add(SciformaField.builder().name("Ecart début").type(FieldType.DURATION).build());
         fields.add(SciformaField.builder().name("Ecart durée").type(FieldType.DURATION).build());
         fields.add(SciformaField.builder().name("Ecart fin").type(FieldType.DURATION).build());
-        fields.add(SciformaField.builder().name("Ecart final").type(FieldType.COST).build());
-        fields.add(SciformaField.builder().name("Ecart prévision").type(FieldType.COST).build());
         fields.add(SciformaField.builder().name("Fin année en cours").type(FieldType.DATE).build());
         fields.add(SciformaField.builder().name("Fin mois en cours").type(FieldType.DATE).build());
         fields.add(SciformaField.builder().name("Fin semaine en cours").type(FieldType.DATE).build());

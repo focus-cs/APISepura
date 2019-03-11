@@ -63,8 +63,6 @@ public class ProjectExtractorFactory {
         fields.add(SciformaField.builder().name("Ecart début").type(FieldType.DURATION).build());
         fields.add(SciformaField.builder().name("Ecart durée").type(FieldType.DURATION).build());
         fields.add(SciformaField.builder().name("Ecart fin").type(FieldType.DURATION).build());
-        fields.add(SciformaField.builder().name("Ecart final").type(FieldType.COST).build());
-        fields.add(SciformaField.builder().name("Ecart prévision").type(FieldType.COST).build());
         fields.add(SciformaField.builder().name("Finish").type(FieldType.DATE).build());
         fields.add(SciformaField.builder().name("Finish Constraint").type(FieldType.DATE).build());
         fields.add(SciformaField.builder().name("Hors-projet").type(FieldType.STRING).build());
@@ -73,9 +71,6 @@ public class ProjectExtractorFactory {
         fields.add(SciformaField.builder().name("Index prévision (SPI)").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("Initiator").type(FieldType.USER).build());
         fields.add(SciformaField.builder().name("Internal ID").type(FieldType.DECIMAL).build());
-        fields.add(SciformaField.builder().name("Labor ACWP").type(FieldType.COST).build());
-        fields.add(SciformaField.builder().name("Labor BCWP").type(FieldType.COST).build());
-        fields.add(SciformaField.builder().name("Labor BCWS").type(FieldType.COST).build());
         fields.add(SciformaField.builder().name("Manager 1").type(FieldType.USER).build());
         fields.add(SciformaField.builder().name("Manager 2").type(FieldType.USER).build());
         fields.add(SciformaField.builder().name("Manager 3").type(FieldType.USER).build());
