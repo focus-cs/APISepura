@@ -1,4 +1,4 @@
-package fr.sciforma.apietnic.business;
+package fr.sciforma.apietnic.business.model;
 
 public enum FieldType {
     DECIMAL,

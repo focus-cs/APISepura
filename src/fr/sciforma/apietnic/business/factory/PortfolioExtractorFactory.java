@@ -1,8 +1,8 @@
 package fr.sciforma.apietnic.business.factory;
 
 import com.sciforma.psnext.api.PortfolioFolder;
-import fr.sciforma.apietnic.business.FieldType;
-import fr.sciforma.apietnic.business.SciformaField;
+import fr.sciforma.apietnic.business.model.FieldType;
+import fr.sciforma.apietnic.business.model.SciformaField;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 

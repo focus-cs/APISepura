@@ -1,14 +1,10 @@
 package fr.sciforma.apietnic.business.processor;
 
 import com.sciforma.psnext.api.User;
-import fr.sciforma.apietnic.business.FieldType;
-import fr.sciforma.apietnic.business.SciformaField;
+import fr.sciforma.apietnic.business.model.FieldType;
+import fr.sciforma.apietnic.business.model.SciformaField;
 import fr.sciforma.apietnic.business.extractor.Extractor;
-import fr.sciforma.apietnic.business.factory.UserExtractorFactory;
 import fr.sciforma.apietnic.service.SciformaService;
-import org.pmw.tinylog.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;

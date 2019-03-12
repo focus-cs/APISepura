@@ -1,8 +1,8 @@
 package fr.sciforma.apietnic.business.processor;
 
 import com.sciforma.psnext.api.*;
-import fr.sciforma.apietnic.business.FieldType;
-import fr.sciforma.apietnic.business.SciformaField;
+import fr.sciforma.apietnic.business.model.FieldType;
+import fr.sciforma.apietnic.business.model.SciformaField;
 import fr.sciforma.apietnic.business.extractor.Extractor;
 import fr.sciforma.apietnic.business.factory.ResourceAssignementExtractorFactory;
 import fr.sciforma.apietnic.business.factory.ProjectExtractorFactory;

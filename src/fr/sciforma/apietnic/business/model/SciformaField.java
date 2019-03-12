@@ -1,4 +1,4 @@
-package fr.sciforma.apietnic.business;
+package fr.sciforma.apietnic.business.model;
 
 import lombok.Builder;
 import lombok.Getter;

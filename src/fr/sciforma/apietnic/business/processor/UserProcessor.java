@@ -1,7 +1,7 @@
 package fr.sciforma.apietnic.business.processor;
 
 import com.sciforma.psnext.api.User;
-import fr.sciforma.apietnic.business.SciformaField;
+import fr.sciforma.apietnic.business.model.SciformaField;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Value;
