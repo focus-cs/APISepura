@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
-public class IntegerExtractor<T extends FieldAccessor> implements Extractor<T> {
+public class IntegerExtractor<T extends FieldAccessor> implements Extractor<T, Integer> {
 
     @Override
-    public Optional<String> extract(T fieldAccessor, String fieldName) {
+    public Optional<String> extractAsString(T fieldAccessor, String fieldName) {
 
         try {
 
@@ -23,6 +23,20 @@ public class IntegerExtractor<T extends FieldAccessor> implements Extractor<T> {
 
         return Optional.empty();
 
+    }
+
+    @Override
+    public Optional<Integer> extract(T fieldAccessor, String fieldName) {
+
+        try {
+
+            return Optional.of(fieldAccessor.getIntField(fieldName));
+
+        } catch (PSException e) {
+            Logger.error(e, "Failed to retrieve integer value from field " + fieldName);
+        }
+
+        return Optional.empty();
     }
 
 }

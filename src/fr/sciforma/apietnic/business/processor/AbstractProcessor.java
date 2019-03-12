@@ -1,9 +1,16 @@
 package fr.sciforma.apietnic.business.processor;
 
+import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
+import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
+import fr.sciforma.apietnic.business.extractor.DateExtractor;
+import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.Extractor;
+import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
+import fr.sciforma.apietnic.business.extractor.ListExtractor;
+import fr.sciforma.apietnic.business.extractor.StringExtractor;
+import fr.sciforma.apietnic.business.factory.ExtractorFactory;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
-import fr.sciforma.apietnic.business.extractor.*;
-import fr.sciforma.apietnic.business.factory.ExtractorFactory;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +33,8 @@ public abstract class AbstractProcessor<T> {
     @Autowired
     ExtractorFactory<T> extractorFactory;
 
+    Map<FieldType, Extractor<? super T>> extractorMap = new EnumMap<>(FieldType.class);
+
     @Autowired
     protected StringExtractor stringExtractor;
     @Autowired
@@ -44,11 +53,8 @@ public abstract class AbstractProcessor<T> {
     List<SciformaField> fieldsToExtract;
     List<String> csvLines;
 
-    public abstract void process(SciformaService sciformaService);
-
     protected abstract String getFilename();
-
-    Map<FieldType, Extractor<? super T>> extractorMap = new EnumMap<>(FieldType.class);
+    protected abstract void process(SciformaService sciformaService);
 
     @PostConstruct
     public void postConstruct() {

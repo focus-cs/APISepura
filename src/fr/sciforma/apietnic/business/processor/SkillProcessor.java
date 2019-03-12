@@ -1,37 +1,27 @@
 package fr.sciforma.apietnic.business.processor;
 
 import com.sciforma.psnext.api.Skill;
-import fr.sciforma.apietnic.business.model.SciformaField;
 import fr.sciforma.apietnic.service.SciformaService;
-import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 @Component
-public class SkillProcessor extends AbstractProcessor<Skill> {
+public class SkillProcessor extends AbstractSystemDataProcessor<Skill> {
 
     @Value("${filename.skills}")
     private String filename;
 
     @Override
-    public void process(SciformaService sciformaService) {
+    protected Optional<Skill> getFieldAccessors(SciformaService sciformaService) {
+        return sciformaService.getSkills();
+    }
 
-        Logger.info("Processing file " + filename);
-
-        fieldsToExtract = extractorFactory.getFields();
-
-        Optional<Skill> skills = sciformaService.getSkills();
-
-        csvLines = new ArrayList<>();
-
-        skills.ifPresent(this::parseSkills);
-
-        toCsv();
-
-        Logger.info("File " + filename + " has been processed successfully");
-
+    @Override
+    protected List<Skill> getChildren(Skill fieldAccessor) {
+        return fieldAccessor.getChildren();
     }
 
     @Override
@@ -39,30 +29,4 @@ public class SkillProcessor extends AbstractProcessor<Skill> {
         return filename;
     }
 
-    private void parseSkills(Skill root) {
-
-        List<Skill> children = root.getChildren();
-
-        if (children == null || children.isEmpty()) {
-
-            StringJoiner csvLine = new StringJoiner(csvDelimiter);
-
-            for (SciformaField sciformaField : fieldsToExtract) {
-
-                extractorMap.get(sciformaField.getType()).extract(root, sciformaField.getName()).ifPresent(csvLine::add);
-
-            }
-
-            csvLines.add(csvLine.toString());
-
-        } else {
-
-            for (Skill child : children) {
-
-                parseSkills(child);
-
-            }
-        }
-
-    }
 }

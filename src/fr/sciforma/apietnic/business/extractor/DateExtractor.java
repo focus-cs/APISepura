@@ -6,19 +6,34 @@ import org.pmw.tinylog.Logger;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 
 @Component
-public class DateExtractor<T extends FieldAccessor> implements Extractor<T> {
+public class DateExtractor<T extends FieldAccessor> implements Extractor<T, Date> {
 
     private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
     @Override
-    public Optional<String> extract(T fieldAccessor, String fieldName) {
+    public Optional<String> extractAsString(T fieldAccessor, String fieldName) {
 
         try {
 
             return Optional.of(sdf.format(fieldAccessor.getDateField(fieldName)));
+
+        } catch (PSException e) {
+            Logger.error(e, "Failed to retrieve date value from field " + fieldName);
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Date> extract(T fieldAccessor, String fieldName) {
+
+        try {
+
+            return Optional.of(fieldAccessor.getDateField(fieldName));
 
         } catch (PSException e) {
             Logger.error(e, "Failed to retrieve date value from field " + fieldName);

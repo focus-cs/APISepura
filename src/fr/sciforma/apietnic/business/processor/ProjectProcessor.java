@@ -27,17 +27,16 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
     private String resourceAssignementFilename;
 
     @Autowired
-    ProjectExtractorFactory projectExtractorFactory;
+    private ProjectExtractorFactory projectExtractorFactory;
     @Autowired
-    TaskExtractorFactory taskExtractorFactory;
+    private TaskExtractorFactory taskExtractorFactory;
     @Autowired
-    ResourceAssignementExtractorFactory resourceAssignementExtractorFactory;
+    private ResourceAssignementExtractorFactory resourceAssignementExtractorFactory;
 
-    private Map<FieldType, Extractor<Project>> projectExtractorMap = new EnumMap<>(FieldType.class);
-    private Map<FieldType, Extractor<Task>> taskExtractorMap = new EnumMap<>(FieldType.class);
-    private Map<FieldType, Extractor<ResAssignment>> assignmentExtractorMap = new EnumMap<>(FieldType.class);
+    private Map<FieldType, Extractor<Project, String>> projectExtractorMap = new EnumMap<>(FieldType.class);
+    private Map<FieldType, Extractor<Task, String>> taskExtractorMap = new EnumMap<>(FieldType.class);
+    private Map<FieldType, Extractor<ResAssignment, String>> assignmentExtractorMap = new EnumMap<>(FieldType.class);
 
-    private List<String> extractedProjects;
     private List<String> extractedTasks;
     private List<String> extractedAssignements;
 
@@ -105,7 +104,7 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
         assignementFieldsToExtract = resourceAssignementExtractorFactory.getFields();
 
 
-        extractedProjects = new ArrayList<>(projectList.size());
+        List<String> extractedProjects = new ArrayList<>(projectList.size());
         extractedTasks = new ArrayList<>();
         extractedAssignements = new ArrayList<>();
 
@@ -115,21 +114,19 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
                 project.open(true);
 
-                Logger.info("Extracting data from project : " + projectExtractorMap.get(FieldType.STRING).extract(project, "Name"));
+                Logger.info("Extracting data from project : " + projectExtractorMap.get(FieldType.STRING).extractAsString(project, "Name"));
 
                 StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
                 for (SciformaField sciformaField : projectFieldsToExtract) {
 
-                    projectExtractorMap.get(sciformaField.getType()).extract(project, sciformaField.getName()).ifPresent(csvLine::add);
+                    projectExtractorMap.get(sciformaField.getType()).extractAsString(project, sciformaField.getName()).ifPresent(csvLine::add);
 
                 }
 
-                Logger.info(csvLine.toString());
-
                 extractedProjects.add(csvLine.toString());
 
-                extractTasks(project);
+                extractTasksFromProject(project);
 
                 //TODO: remove this (for testing purpose)
                 break;
@@ -156,7 +153,7 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
         return null;
     }
 
-    private void extractTasks(Project project) {
+    private void extractTasksFromProject(Project project) {
 
         try {
 
@@ -172,7 +169,7 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
 
         } catch (PSException e) {
-            Logger.error(e, "Failed to retrieve task outline for project " + projectExtractorMap.get(FieldType.STRING).extract(project, "Name"));
+            Logger.error(e, "Failed to retrieve task outline for project " + projectExtractorMap.get(FieldType.STRING).extractAsString(project, "Name"));
         }
 
 
@@ -191,13 +188,21 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
                 StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
+                Optional<String> duration = Optional.empty();
+
                 for (SciformaField sciformaField : taskFieldsToExtract) {
-                    taskExtractorMap.get(sciformaField.getType()).extract(task, sciformaField.getName()).ifPresent(csvLine::add);
+                    taskExtractorMap.get(sciformaField.getType()).extractAsString(task, sciformaField.getName()).ifPresent(csvLine::add);
+
+                    if("Duration".equals(sciformaField.getName())) {
+                        duration = taskExtractorMap.get(sciformaField.getType()).extractAsString(task, sciformaField.getName());
+                    }
                 }
 
                 extractedTasks.add(csvLine.toString());
 
-                extractAssignements(task);
+                if(duration.isPresent()) {
+                    extractAssignementsFromTask(task, duration.get());
+                }
 
             } catch (PSException e) {
                 Logger.error(e, "Failed to retrieve task");
@@ -206,7 +211,7 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
         }
     }
 
-    private void extractAssignements(Task task) {
+    private void extractAssignementsFromTask(Task task, String duration) {
 
         try {
 
@@ -219,18 +224,21 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
                 StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
                 for (SciformaField sciformaField : assignementFieldsToExtract) {
-                    assignmentExtractorMap.get(sciformaField.getType()).extract(resAssignment, sciformaField.getName()).ifPresent(csvLine::add);
+                    assignmentExtractorMap.get(sciformaField.getType()).extractAsString(resAssignment, sciformaField.getName()).ifPresent(csvLine::add);
                 }
 
-                Logger.info(csvLine.toString());
                 extractedAssignements.add(csvLine.toString());
 
             }
 
         } catch (PSException e) {
-            Logger.error(e, "Failed to retrieve resource assignement for task " + taskExtractorMap.get(FieldType.STRING).extract(task, "Name"));
+            Logger.error(e, "Failed to retrieve resource assignement for task " + taskExtractorMap.get(FieldType.STRING).extractAsString(task, "Name"));
         }
 
     }
 
+    @Override
+    void toCsv() {
+        super.toCsv();
+    }
 }
