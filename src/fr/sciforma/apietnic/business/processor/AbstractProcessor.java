@@ -33,22 +33,7 @@ public abstract class AbstractProcessor<T> {
     @Autowired
     ExtractorFactory<T> extractorFactory;
 
-    Map<FieldType, Extractor<? super T>> extractorMap = new EnumMap<>(FieldType.class);
-
-    @Autowired
-    protected StringExtractor stringExtractor;
-    @Autowired
-    protected DecimalExtractor decimalExtractor;
-    @Autowired
-    protected BooleanExtractor booleanExtractor;
-    @Autowired
-    protected DateExtractor dateExtractor;
-    @Autowired
-    protected IntegerExtractor integerExtractor;
-    @Autowired
-    protected ListExtractor listExtractor;
-    @Autowired
-    protected CalendarExtractor calendarExtractor;
+    Map<FieldType, Extractor<? super T, ?>> extractorMap = new EnumMap<>(FieldType.class);
 
     List<SciformaField> fieldsToExtract;
     List<String> csvLines;
@@ -58,21 +43,21 @@ public abstract class AbstractProcessor<T> {
 
     @PostConstruct
     public void postConstruct() {
-        extractorMap.putIfAbsent(FieldType.STRING, stringExtractor);
-        extractorMap.putIfAbsent(FieldType.DECIMAL, decimalExtractor);
-        extractorMap.putIfAbsent(FieldType.BOOLEAN, booleanExtractor);
-        extractorMap.putIfAbsent(FieldType.COST, decimalExtractor);
-        extractorMap.putIfAbsent(FieldType.EFFORT, decimalExtractor);
-        extractorMap.putIfAbsent(FieldType.DATE, dateExtractor);
-        extractorMap.putIfAbsent(FieldType.FORMULA, stringExtractor);
-        extractorMap.putIfAbsent(FieldType.DURATION, decimalExtractor);
-        extractorMap.putIfAbsent(FieldType.INTEGER, integerExtractor);
-        extractorMap.putIfAbsent(FieldType.USER, stringExtractor);
-        extractorMap.putIfAbsent(FieldType.RESOURCE, stringExtractor);
-        extractorMap.putIfAbsent(FieldType.URL, stringExtractor);
-        extractorMap.putIfAbsent(FieldType.CALENDAR, stringExtractor);
-        extractorMap.putIfAbsent(FieldType.EFFORT_RATE, stringExtractor);
-        extractorMap.putIfAbsent(FieldType.LIST, listExtractor);
+        extractorMap.putIfAbsent(FieldType.STRING, getStringExtractor());
+        extractorMap.putIfAbsent(FieldType.DECIMAL, getDecimalExtractor());
+        extractorMap.putIfAbsent(FieldType.BOOLEAN, getBooleanExtractor());
+        extractorMap.putIfAbsent(FieldType.COST, getDecimalExtractor());
+        extractorMap.putIfAbsent(FieldType.EFFORT, getDecimalExtractor());
+        extractorMap.putIfAbsent(FieldType.DATE, getDateExtractor());
+        extractorMap.putIfAbsent(FieldType.FORMULA, getStringExtractor());
+        extractorMap.putIfAbsent(FieldType.DURATION, getDecimalExtractor());
+        extractorMap.putIfAbsent(FieldType.INTEGER, getIntegerExtractor());
+        extractorMap.putIfAbsent(FieldType.USER, getStringExtractor());
+        extractorMap.putIfAbsent(FieldType.RESOURCE, getStringExtractor());
+        extractorMap.putIfAbsent(FieldType.URL, getStringExtractor());
+        extractorMap.putIfAbsent(FieldType.CALENDAR, getStringExtractor());
+        extractorMap.putIfAbsent(FieldType.EFFORT_RATE, getStringExtractor());
+        extractorMap.putIfAbsent(FieldType.LIST, getListExtractor());
     }
 
     void toCsv() {
@@ -98,4 +83,13 @@ public abstract class AbstractProcessor<T> {
             Logger.error(e, "Failed to create file with path " + filePath);
         }
     }
+
+    public abstract StringExtractor<? super T> getStringExtractor();
+    public abstract DecimalExtractor<? super T> getDecimalExtractor();
+    public abstract BooleanExtractor<? super T> getBooleanExtractor();
+    public abstract DateExtractor<? super T> getDateExtractor();
+    public abstract IntegerExtractor<? super T> getIntegerExtractor();
+    public abstract ListExtractor<? super T> getListExtractor();
+    public abstract CalendarExtractor<? super T> getCalendarExtractor();
+
 }
