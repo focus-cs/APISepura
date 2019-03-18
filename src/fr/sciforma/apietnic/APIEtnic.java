@@ -4,7 +4,6 @@ import fr.sciforma.apietnic.business.processor.JobClassificationProcessor;
 import fr.sciforma.apietnic.business.processor.OrganizationProcessor;
 import fr.sciforma.apietnic.business.processor.PortfolioFolderProcessor;
 import fr.sciforma.apietnic.business.processor.ProjectProcessor;
-import fr.sciforma.apietnic.business.processor.ResourceProcessor;
 import fr.sciforma.apietnic.business.processor.SkillProcessor;
 import fr.sciforma.apietnic.business.processor.UserProcessor;
 import fr.sciforma.apietnic.service.SciformaService;
@@ -27,8 +26,6 @@ public class APIEtnic {
     ProjectProcessor projectProcessor;
     @Autowired
     UserProcessor userProcessor;
-    @Autowired
-    ResourceProcessor resourceProcessor;
     @Autowired
     JobClassificationProcessor jobClassificationProcessor;
     @Autowired
@@ -62,9 +59,8 @@ public class APIEtnic {
 
             if (sciformaService.createConnection()) {
 
-//                projectProcessor.process(sciformaService);
+                projectProcessor.process(sciformaService);
                 userProcessor.process(sciformaService);
-                resourceProcessor.process(sciformaService);
                 jobClassificationProcessor.process(sciformaService);
                 organizationProcessor.process(sciformaService);
                 portfolioFolderProcessor.process(sciformaService);

@@ -35,7 +35,6 @@ public abstract class AbstractProcessor<T> {
 
     Map<FieldType, Extractor<? super T, ?>> extractorMap = new EnumMap<>(FieldType.class);
 
-    List<SciformaField> fieldsToExtract;
     List<String> csvLines;
 
     protected abstract String getFilename();
@@ -61,13 +60,14 @@ public abstract class AbstractProcessor<T> {
     }
 
     void toCsv() {
+
         String filePath = path + getFilename();
 
         try (FileWriter fileWriter = new FileWriter(filePath)) {
 
             StringJoiner header = new StringJoiner(csvDelimiter);
 
-            for (SciformaField field : fieldsToExtract) {
+            for (SciformaField field : getFieldsToExtract()) {
                 header.add(field.getName());
             }
 
@@ -82,8 +82,12 @@ public abstract class AbstractProcessor<T> {
         } catch (IOException e) {
             Logger.error(e, "Failed to create file with path " + filePath);
         }
+
     }
 
+    public List<SciformaField> getFieldsToExtract() {
+        return extractorFactory.getFields();
+    }
     public abstract StringExtractor<? super T> getStringExtractor();
     public abstract DecimalExtractor<? super T> getDecimalExtractor();
     public abstract BooleanExtractor<? super T> getBooleanExtractor();

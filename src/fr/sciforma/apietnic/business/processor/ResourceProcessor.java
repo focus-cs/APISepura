@@ -8,12 +8,18 @@ import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
 import fr.sciforma.apietnic.business.extractor.StringExtractor;
+import fr.sciforma.apietnic.business.model.FieldType;
+import fr.sciforma.apietnic.business.model.SciformaField;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.StringJoiner;
 
 @Component
 public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> {
@@ -35,6 +41,39 @@ public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> 
     private ListExtractor<Resource> listExtractor;
     @Autowired
     private CalendarExtractor<Resource> calendarExtractor;
+
+    public Map<Double, String> getResourcesById(SciformaService sciformaService) {
+
+        Map<Double, String> resourcesById = new HashMap<>();
+
+        StringJoiner csvLine;
+
+        for (Resource fieldAccessor : getFieldAccessors(sciformaService)) {
+
+            csvLine = new StringJoiner(csvDelimiter);
+
+            Optional<Double> internalId = (Optional<Double>) extractorMap.get(FieldType.DECIMAL).extract(fieldAccessor, "Internal ID");
+
+            if (internalId.isPresent()) {
+
+                for (SciformaField sciformaField : getFieldsToExtract()) {
+
+                    extractorMap.get(sciformaField.getType()).extractAsString(fieldAccessor, sciformaField.getName()).ifPresent(csvLine::add);
+
+                }
+
+                resourcesById.putIfAbsent(internalId.get(), csvLine.toString());
+
+            }
+
+        }
+        return resourcesById;
+    }
+
+    @Override
+    public void process(SciformaService sciformaService) {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     protected String getFilename() {

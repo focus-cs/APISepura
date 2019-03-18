@@ -22,8 +22,6 @@ public abstract class AbstractSystemDataProcessor<T> extends AbstractProcessor<T
 
         Logger.info("Processing file " + getFilename());
 
-        fieldsToExtract = extractorFactory.getFields();
-
         Optional<T> skills = getFieldAccessors(sciformaService);
 
         csvLines = new ArrayList<>();
@@ -44,7 +42,7 @@ public abstract class AbstractSystemDataProcessor<T> extends AbstractProcessor<T
 
             StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
-            for (SciformaField sciformaField : fieldsToExtract) {
+            for (SciformaField sciformaField : getFieldsToExtract()) {
 
                 extractorMap.get(sciformaField.getType()).extractAsString(root, sciformaField.getName()).ifPresent(csvLine::add);
 

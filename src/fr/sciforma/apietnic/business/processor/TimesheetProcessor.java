@@ -1,6 +1,6 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.Timesheet;
+import com.sciforma.psnext.api.TimesheetAssignment;
 import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
 import fr.sciforma.apietnic.business.extractor.DateExtractor;
@@ -12,10 +12,10 @@ import fr.sciforma.apietnic.service.SciformaService;
 
 import java.util.List;
 
-public class TimesheetProcessor extends AbstractFieldAccessorProcessor<Timesheet> {
+public class TimesheetProcessor extends AbstractFieldAccessorProcessor<TimesheetAssignment> {
 
     @Override
-    protected List<Timesheet> getFieldAccessors(SciformaService sciformaService) {
+    protected List<TimesheetAssignment> getFieldAccessors(SciformaService sciformaService) {
         return null;
     }
 
@@ -25,37 +25,37 @@ public class TimesheetProcessor extends AbstractFieldAccessorProcessor<Timesheet
     }
 
     @Override
-    public StringExtractor<Timesheet> getStringExtractor() {
+    public StringExtractor<TimesheetAssignment> getStringExtractor() {
         return null;
     }
 
     @Override
-    public DecimalExtractor<Timesheet> getDecimalExtractor() {
+    public DecimalExtractor<TimesheetAssignment> getDecimalExtractor() {
         return null;
     }
 
     @Override
-    public BooleanExtractor<Timesheet> getBooleanExtractor() {
+    public BooleanExtractor<TimesheetAssignment> getBooleanExtractor() {
         return null;
     }
 
     @Override
-    public DateExtractor<Timesheet> getDateExtractor() {
+    public DateExtractor<TimesheetAssignment> getDateExtractor() {
         return null;
     }
 
     @Override
-    public IntegerExtractor<Timesheet> getIntegerExtractor() {
+    public IntegerExtractor<TimesheetAssignment> getIntegerExtractor() {
         return null;
     }
 
     @Override
-    public ListExtractor<Timesheet> getListExtractor() {
+    public ListExtractor<TimesheetAssignment> getListExtractor() {
         return null;
     }
 
     @Override
-    public CalendarExtractor<Timesheet> getCalendarExtractor() {
+    public CalendarExtractor<TimesheetAssignment> getCalendarExtractor() {
         return null;
     }
 

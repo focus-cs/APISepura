@@ -1,112 +1,61 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.*;
+import com.sciforma.psnext.api.LockException;
+import com.sciforma.psnext.api.PSException;
+import com.sciforma.psnext.api.Project;
+import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
+import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
+import fr.sciforma.apietnic.business.extractor.DateExtractor;
+import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
+import fr.sciforma.apietnic.business.extractor.ListExtractor;
+import fr.sciforma.apietnic.business.extractor.StringExtractor;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
-import fr.sciforma.apietnic.business.extractor.Extractor;
-import fr.sciforma.apietnic.business.factory.ResourceAssignementExtractorFactory;
-import fr.sciforma.apietnic.business.factory.ProjectExtractorFactory;
-import fr.sciforma.apietnic.business.factory.TaskExtractorFactory;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
 
 @Component
 public class ProjectProcessor extends AbstractProcessor<Project> {
 
     @Value("${filename.projects}")
-    private String projectsFilename;
-    @Value("${filename.tasks}")
-    private String tasksFilename;
-    @Value("${filename.resAssignements}")
-    private String resourceAssignementFilename;
+    private String filename;
 
     @Autowired
-    private ProjectExtractorFactory projectExtractorFactory;
+    private StringExtractor<Project> stringExtractor;
     @Autowired
-    private TaskExtractorFactory taskExtractorFactory;
+    private DecimalExtractor<Project> decimalExtractor;
     @Autowired
-    private ResourceAssignementExtractorFactory resourceAssignementExtractorFactory;
+    private BooleanExtractor<Project> booleanExtractor;
+    @Autowired
+    private DateExtractor<Project> dateExtractor;
+    @Autowired
+    private IntegerExtractor<Project> integerExtractor;
+    @Autowired
+    private ListExtractor<Project> listExtractor;
+    @Autowired
+    private CalendarExtractor<Project> calendarExtractor;
 
-    private Map<FieldType, Extractor<Project, String>> projectExtractorMap = new EnumMap<>(FieldType.class);
-    private Map<FieldType, Extractor<Task, String>> taskExtractorMap = new EnumMap<>(FieldType.class);
-    private Map<FieldType, Extractor<ResAssignment, String>> assignmentExtractorMap = new EnumMap<>(FieldType.class);
-
-    private List<String> extractedTasks;
-    private List<String> extractedAssignements;
-
-    private List<SciformaField> taskFieldsToExtract;
-    private List<SciformaField> assignementFieldsToExtract;
-
-    @PostConstruct
-    public void postConstruct() {
-        projectExtractorMap.putIfAbsent(FieldType.STRING, stringExtractor);
-        projectExtractorMap.putIfAbsent(FieldType.DECIMAL, decimalExtractor);
-        projectExtractorMap.putIfAbsent(FieldType.BOOLEAN, booleanExtractor);
-        projectExtractorMap.putIfAbsent(FieldType.COST, decimalExtractor);
-        projectExtractorMap.putIfAbsent(FieldType.EFFORT, decimalExtractor);
-        projectExtractorMap.putIfAbsent(FieldType.DATE, dateExtractor);
-        projectExtractorMap.putIfAbsent(FieldType.FORMULA, stringExtractor);
-        projectExtractorMap.putIfAbsent(FieldType.DURATION, decimalExtractor);
-        projectExtractorMap.putIfAbsent(FieldType.INTEGER, integerExtractor);
-        projectExtractorMap.putIfAbsent(FieldType.USER, stringExtractor);
-        projectExtractorMap.putIfAbsent(FieldType.RESOURCE, stringExtractor);
-        projectExtractorMap.putIfAbsent(FieldType.URL, stringExtractor);
-        projectExtractorMap.putIfAbsent(FieldType.CALENDAR, stringExtractor);
-        projectExtractorMap.putIfAbsent(FieldType.EFFORT_RATE, stringExtractor);
-        projectExtractorMap.putIfAbsent(FieldType.LIST, listExtractor);
-
-        taskExtractorMap.putIfAbsent(FieldType.STRING, stringExtractor);
-        taskExtractorMap.putIfAbsent(FieldType.DECIMAL, decimalExtractor);
-        taskExtractorMap.putIfAbsent(FieldType.BOOLEAN, booleanExtractor);
-        taskExtractorMap.putIfAbsent(FieldType.COST, decimalExtractor);
-        taskExtractorMap.putIfAbsent(FieldType.EFFORT, decimalExtractor);
-        taskExtractorMap.putIfAbsent(FieldType.DATE, dateExtractor);
-        taskExtractorMap.putIfAbsent(FieldType.FORMULA, stringExtractor);
-        taskExtractorMap.putIfAbsent(FieldType.DURATION, decimalExtractor);
-        taskExtractorMap.putIfAbsent(FieldType.INTEGER, integerExtractor);
-        taskExtractorMap.putIfAbsent(FieldType.USER, stringExtractor);
-        taskExtractorMap.putIfAbsent(FieldType.RESOURCE, stringExtractor);
-        taskExtractorMap.putIfAbsent(FieldType.URL, stringExtractor);
-        taskExtractorMap.putIfAbsent(FieldType.CALENDAR, stringExtractor);
-        taskExtractorMap.putIfAbsent(FieldType.EFFORT_RATE, stringExtractor);
-        taskExtractorMap.putIfAbsent(FieldType.LIST, listExtractor);
-
-        assignmentExtractorMap.putIfAbsent(FieldType.STRING, stringExtractor);
-        assignmentExtractorMap.putIfAbsent(FieldType.DECIMAL, decimalExtractor);
-        assignmentExtractorMap.putIfAbsent(FieldType.BOOLEAN, booleanExtractor);
-        assignmentExtractorMap.putIfAbsent(FieldType.COST, decimalExtractor);
-        assignmentExtractorMap.putIfAbsent(FieldType.EFFORT, decimalExtractor);
-        assignmentExtractorMap.putIfAbsent(FieldType.DATE, dateExtractor);
-        assignmentExtractorMap.putIfAbsent(FieldType.FORMULA, stringExtractor);
-        assignmentExtractorMap.putIfAbsent(FieldType.DURATION, decimalExtractor);
-        assignmentExtractorMap.putIfAbsent(FieldType.INTEGER, integerExtractor);
-        assignmentExtractorMap.putIfAbsent(FieldType.USER, stringExtractor);
-        assignmentExtractorMap.putIfAbsent(FieldType.RESOURCE, stringExtractor);
-        assignmentExtractorMap.putIfAbsent(FieldType.URL, stringExtractor);
-        assignmentExtractorMap.putIfAbsent(FieldType.CALENDAR, stringExtractor);
-        assignmentExtractorMap.putIfAbsent(FieldType.EFFORT_RATE, stringExtractor);
-        assignmentExtractorMap.putIfAbsent(FieldType.LIST, listExtractor);
-    }
+    @Autowired
+    private TaskProcessor taskProcessor;
+    @Autowired
+    private ResourceAssignementProcessor resourceAssignementProcessor;
 
     @Override
     public void process(SciformaService sciformaService) {
 
         List<Project> projectList = sciformaService.getProjects();
 
-        List<SciformaField> projectFieldsToExtract = projectExtractorFactory.getFields();
-        taskFieldsToExtract = taskExtractorFactory.getFields();
-        assignementFieldsToExtract = resourceAssignementExtractorFactory.getFields();
+        csvLines = new ArrayList<>();
 
-
-        List<String> extractedProjects = new ArrayList<>(projectList.size());
-        extractedTasks = new ArrayList<>();
-        extractedAssignements = new ArrayList<>();
+        int testCpt = 0;
 
         for (Project project : projectList) {
 
@@ -114,22 +63,25 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
                 project.open(true);
 
-                Logger.info("Extracting data from project : " + projectExtractorMap.get(FieldType.STRING).extractAsString(project, "Name"));
+                Logger.info("Extracting data from project : " + extractorMap.get(FieldType.STRING).extractAsString(project, "Name"));
 
                 StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
-                for (SciformaField sciformaField : projectFieldsToExtract) {
+                for (SciformaField sciformaField : getFieldsToExtract()) {
 
-                    projectExtractorMap.get(sciformaField.getType()).extractAsString(project, sciformaField.getName()).ifPresent(csvLine::add);
+                    extractorMap.get(sciformaField.getType()).extractAsString(project, sciformaField.getName()).ifPresent(csvLine::add);
 
                 }
 
-                extractedProjects.add(csvLine.toString());
+                csvLines.add(csvLine.toString());
 
-                extractTasksFromProject(project);
+                taskProcessor.process(project);
 
                 //TODO: remove this (for testing purpose)
-                break;
+                testCpt++;
+                if(testCpt > 10) {
+                    break;
+                }
 
             } catch (LockException e) {
                 Logger.error("Project is locked by " + e.getLockingUser());
@@ -146,99 +98,50 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
             }
 
         }
+
+        toCsv();
+        taskProcessor.toCsv();
+        resourceAssignementProcessor.toCsv();
+
     }
 
     @Override
     protected String getFilename() {
-        return null;
-    }
-
-    private void extractTasksFromProject(Project project) {
-
-        try {
-
-            TaskOutlineList tasks = project.getTaskOutlineList();
-
-            Iterator taskTterator = tasks.iterator();
-            while (taskTterator.hasNext()) {
-                Task task = (Task) taskTterator.next();
-
-                parseTask(task.getSuccessorLinksList());
-                parseTask(task.getPredecessorLinksList());
-            }
-
-
-        } catch (PSException e) {
-            Logger.error(e, "Failed to retrieve task outline for project " + projectExtractorMap.get(FieldType.STRING).extractAsString(project, "Name"));
-        }
-
-
-    }
-
-    private void parseTask(List<Task> tasks) {
-
-        Iterator taskIterator = tasks.iterator();
-
-        while (taskIterator.hasNext()) {
-            TaskLink taskLink = (TaskLink) taskIterator.next();
-
-            Task task;
-            try {
-                task = taskLink.getTask();
-
-                StringJoiner csvLine = new StringJoiner(csvDelimiter);
-
-                Optional<String> duration = Optional.empty();
-
-                for (SciformaField sciformaField : taskFieldsToExtract) {
-                    taskExtractorMap.get(sciformaField.getType()).extractAsString(task, sciformaField.getName()).ifPresent(csvLine::add);
-
-                    if("Duration".equals(sciformaField.getName())) {
-                        duration = taskExtractorMap.get(sciformaField.getType()).extractAsString(task, sciformaField.getName());
-                    }
-                }
-
-                extractedTasks.add(csvLine.toString());
-
-                if(duration.isPresent()) {
-                    extractAssignementsFromTask(task, duration.get());
-                }
-
-            } catch (PSException e) {
-                Logger.error(e, "Failed to retrieve task");
-            }
-
-        }
-    }
-
-    private void extractAssignementsFromTask(Task task, String duration) {
-
-        try {
-
-            List resAssignmentList = task.getResAssignmentList();
-
-            Iterator assignementIterator = resAssignmentList.iterator();
-            while (assignementIterator.hasNext()) {
-                ResAssignment resAssignment = (ResAssignment) assignementIterator.next();
-
-                StringJoiner csvLine = new StringJoiner(csvDelimiter);
-
-                for (SciformaField sciformaField : assignementFieldsToExtract) {
-                    assignmentExtractorMap.get(sciformaField.getType()).extractAsString(resAssignment, sciformaField.getName()).ifPresent(csvLine::add);
-                }
-
-                extractedAssignements.add(csvLine.toString());
-
-            }
-
-        } catch (PSException e) {
-            Logger.error(e, "Failed to retrieve resource assignement for task " + taskExtractorMap.get(FieldType.STRING).extractAsString(task, "Name"));
-        }
-
+        return filename;
     }
 
     @Override
-    void toCsv() {
-        super.toCsv();
+    public StringExtractor<Project> getStringExtractor() {
+        return stringExtractor;
+    }
+
+    @Override
+    public DecimalExtractor<Project> getDecimalExtractor() {
+        return decimalExtractor;
+    }
+
+    @Override
+    public BooleanExtractor<Project> getBooleanExtractor() {
+        return booleanExtractor;
+    }
+
+    @Override
+    public DateExtractor<Project> getDateExtractor() {
+        return dateExtractor;
+    }
+
+    @Override
+    public IntegerExtractor<Project> getIntegerExtractor() {
+        return integerExtractor;
+    }
+
+    @Override
+    public ListExtractor<Project> getListExtractor() {
+        return listExtractor;
+    }
+
+    @Override
+    public CalendarExtractor<Project> getCalendarExtractor() {
+        return calendarExtractor;
     }
 }

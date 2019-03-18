@@ -18,14 +18,13 @@ public abstract class AbstractFieldAccessorProcessor<T> extends AbstractProcesso
     public void process(SciformaService sciformaService) {
         Logger.info("Processing file " + getFilename());
 
-        fieldsToExtract = extractorFactory.getFields();
         csvLines = new ArrayList<>();
 
         for (T fieldAccessor : getFieldAccessors(sciformaService)) {
 
             StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
-            for (SciformaField sciformaField : fieldsToExtract) {
+            for (SciformaField sciformaField : getFieldsToExtract()) {
 
                 extractorMap.get(sciformaField.getType()).extractAsString(fieldAccessor, sciformaField.getName()).ifPresent(csvLine::add);
 
