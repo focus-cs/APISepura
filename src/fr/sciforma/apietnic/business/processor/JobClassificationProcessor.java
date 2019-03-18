@@ -1,13 +1,7 @@
 package fr.sciforma.apietnic.business.processor;
 
 import com.sciforma.psnext.api.JobClassification;
-import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
-import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
-import fr.sciforma.apietnic.business.extractor.DateExtractor;
-import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
-import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
-import fr.sciforma.apietnic.business.extractor.ListExtractor;
-import fr.sciforma.apietnic.business.extractor.StringExtractor;
+import fr.sciforma.apietnic.business.extractor.*;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +30,8 @@ public class JobClassificationProcessor extends AbstractSystemDataProcessor<JobC
     private ListExtractor<JobClassification> listExtractor;
     @Autowired
     private CalendarExtractor<JobClassification> calendarExtractor;
+    @Autowired
+    private EffortExtractor<JobClassification> effortExtractor;
 
     @Override
     protected Optional<JobClassification> getFieldAccessors(SciformaService sciformaService) {
@@ -85,5 +81,10 @@ public class JobClassificationProcessor extends AbstractSystemDataProcessor<JobC
     @Override
     public CalendarExtractor<JobClassification> getCalendarExtractor() {
         return calendarExtractor;
+    }
+
+    @Override
+    public EffortExtractor<JobClassification> getEffortExtractor() {
+        return effortExtractor;
     }
 }

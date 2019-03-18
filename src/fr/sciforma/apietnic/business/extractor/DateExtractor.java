@@ -19,7 +19,10 @@ public class DateExtractor<T extends FieldAccessor> implements Extractor<T, Date
 
         try {
 
-            return Optional.of(sdf.format(fieldAccessor.getDateField(fieldName)));
+            Date dateField = fieldAccessor.getDateField(fieldName);
+            if (dateField != null) {
+                return Optional.of(sdf.format(dateField));
+            }
 
         } catch (PSException e) {
             Logger.error(e, "Failed to retrieve date value from field " + fieldName);

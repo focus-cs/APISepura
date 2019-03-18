@@ -1,15 +1,8 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.PSException;
-import com.sciforma.psnext.api.ResAssignment;
-import com.sciforma.psnext.api.Task;
-import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
-import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
-import fr.sciforma.apietnic.business.extractor.DateExtractor;
-import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
-import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
-import fr.sciforma.apietnic.business.extractor.ListExtractor;
-import fr.sciforma.apietnic.business.extractor.StringExtractor;
+import com.sciforma.psnext.api.*;
+import fr.sciforma.apietnic.business.extractor.*;
+import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
@@ -18,10 +11,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.StringJoiner;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
 
 @Component
 public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignment> {
@@ -43,6 +36,8 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
     private ListExtractor<ResAssignment> listExtractor;
     @Autowired
     private CalendarExtractor<ResAssignment> calendarExtractor;
+    @Autowired
+    private EffortExtractor<ResAssignment> effortExtractor;
 
     @PostConstruct
     public void postConstruct() {
@@ -55,12 +50,9 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
         return filename;
     }
 
-    @Override
-    protected void process(SciformaService sciformaService) {
-        throw new UnsupportedOperationException();
-    }
+    protected void process(Task task, Date start, Date end) {
 
-    protected void process(Task task, Double s) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
         try {
 
@@ -70,13 +62,43 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
             while (assignementIterator.hasNext()) {
                 ResAssignment resAssignment = (ResAssignment) assignementIterator.next();
 
-                StringJoiner csvLine = new StringJoiner(csvDelimiter);
+                Map<String, List<DoubleDatedData>> effortsFields = new HashMap<>();
 
-                for (SciformaField sciformaField : getFieldsToExtract()) {
-                    extractorMap.get(sciformaField.getType()).extractAsString(resAssignment, sciformaField.getName()).ifPresent(csvLine::add);
+                Map<String, String> nonEffortFields = new HashMap<>();
+
+                LocalDate startDate = start.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                LocalDate endDate = end.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+                for (LocalDate localDate = startDate; localDate.isBefore(endDate); localDate = localDate.plusDays(1)) {
+
+                    StringJoiner csvLine = new StringJoiner(csvDelimiter);
+
+                    for (SciformaField sciformaField : getFieldsToExtract()) {
+
+                        if (sciformaField.getType().equals(FieldType.EFFORT)) {
+
+                            Date from = Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+                            Date to = Date.from(localDate.plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+
+                            List<DoubleDatedData> datedData = resAssignment.getDatedData(sciformaField.getName(), DatedData.DAY, from, to);
+
+                            for (DoubleDatedData datedDatum : datedData) {
+                                csvLine.add(sdf.format(datedDatum.getStart()));
+                                csvLine.add(sdf.format(datedDatum.getFinish()));
+                                csvLine.add(String.valueOf(datedDatum.getData()));
+                            }
+
+
+                        } else {
+
+                            extractorMap.get(sciformaField.getType()).extractAsString(resAssignment, sciformaField.getName()).ifPresent(csvLine::add);
+
+                        }
+                    }
+
+                    csvLines.add(csvLine.toString());
+
                 }
-
-                csvLines.add(csvLine.toString());
 
             }
 
@@ -119,5 +141,10 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
     @Override
     public CalendarExtractor<ResAssignment> getCalendarExtractor() {
         return calendarExtractor;
+    }
+
+    @Override
+    public EffortExtractor<ResAssignment> getEffortExtractor() {
+        return effortExtractor;
     }
 }

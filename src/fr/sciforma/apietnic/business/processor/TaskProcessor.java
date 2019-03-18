@@ -1,33 +1,17 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.PSException;
-import com.sciforma.psnext.api.Project;
-import com.sciforma.psnext.api.Task;
-import com.sciforma.psnext.api.TaskLink;
-import com.sciforma.psnext.api.TaskOutlineList;
-import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
-import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
-import fr.sciforma.apietnic.business.extractor.DateExtractor;
-import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
-import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
-import fr.sciforma.apietnic.business.extractor.ListExtractor;
-import fr.sciforma.apietnic.business.extractor.StringExtractor;
+import com.sciforma.psnext.api.*;
+import fr.sciforma.apietnic.business.extractor.*;
 import fr.sciforma.apietnic.business.model.SciformaField;
-import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.StringJoiner;
+import java.util.*;
 
 @Component
-
 public class TaskProcessor extends AbstractProcessor<Task> {
 
     @Value("${filename.tasks}")
@@ -47,6 +31,8 @@ public class TaskProcessor extends AbstractProcessor<Task> {
     private ListExtractor<Task> listExtractor;
     @Autowired
     private CalendarExtractor<Task> calendarExtractor;
+    @Autowired
+    private EffortExtractor<Task> effortExtractor;
 
     @Autowired
     private ResourceAssignementProcessor resourceAssignementProcessor;
@@ -62,23 +48,16 @@ public class TaskProcessor extends AbstractProcessor<Task> {
         return filename;
     }
 
-    @Override
-    protected void process(SciformaService sciformaService) {
-        throw new UnsupportedOperationException();
-    }
-
-    protected void process(Project project) {
+    protected void process(List<TaskOutlineList> tasks, Date projectStart, Date projectEnd) {
 
         try {
-
-            TaskOutlineList tasks = project.getTaskOutlineList();
 
             Iterator taskTterator = tasks.iterator();
             while (taskTterator.hasNext()) {
                 Task task = (Task) taskTterator.next();
 
-                parseTask(task.getSuccessorLinksList());
-                parseTask(task.getPredecessorLinksList());
+                parseTask(task.getSuccessorLinksList(), projectStart, projectEnd);
+                parseTask(task.getPredecessorLinksList(), projectStart, projectEnd);
             }
 
 
@@ -88,7 +67,7 @@ public class TaskProcessor extends AbstractProcessor<Task> {
 
     }
 
-    private void parseTask(List<Task> tasks) {
+    private void parseTask(List<Task> tasks, Date start, Date end) {
 
         Iterator taskIterator = tasks.iterator();
 
@@ -101,22 +80,31 @@ public class TaskProcessor extends AbstractProcessor<Task> {
 
                 StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
-                Optional<Double> duration = Optional.empty();
+                Optional<Double> taskDuration = Optional.empty();
+
+//                Optional<Date> start = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(task, "Start");
+//                Optional<Date> finish = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(task, "Finish");
+//
+//                taskDuration = (Optional<Double>) extractorMap.get(FieldType.DURATION).extract(task, "Duration");
+//
+//                if(start.isPresent() && finish.isPresent() && taskDuration.isPresent()) {
+//                    Logger.info("Start : " + start.get());
+//                    Logger.info("Finish : " + finish.get());
+//                    Logger.info("Duration : " + taskDuration.get());
+//                }
 
                 for (SciformaField sciformaField : getFieldsToExtract()) {
 
                     extractorMap.get(sciformaField.getType()).extractAsString(task, sciformaField.getName()).ifPresent(csvLine::add);
 
-                    Logger.info("PASSED");
-
                     if ("Duration".equals(sciformaField.getName())) {
-                        duration = (Optional<Double>) extractorMap.get(sciformaField.getType()).extract(task, sciformaField.getName());
+                        taskDuration = (Optional<Double>) extractorMap.get(sciformaField.getType()).extract(task, sciformaField.getName());
                     }
                 }
 
                 csvLines.add(csvLine.toString());
 
-                duration.ifPresent(s -> resourceAssignementProcessor.process(task, s));
+                taskDuration.ifPresent(duration -> resourceAssignementProcessor.process(task, start, end));
 
             } catch (PSException e) {
                 Logger.error(e, "Failed to retrieve task");
@@ -159,5 +147,10 @@ public class TaskProcessor extends AbstractProcessor<Task> {
     @Override
     public CalendarExtractor<Task> getCalendarExtractor() {
         return calendarExtractor;
+    }
+
+    @Override
+    public EffortExtractor<Task> getEffortExtractor() {
+        return effortExtractor;
     }
 }

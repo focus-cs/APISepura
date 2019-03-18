@@ -1,15 +1,10 @@
 package fr.sciforma.apietnic.business.processor;
 
+import com.sciforma.psnext.api.JobClassification;
 import com.sciforma.psnext.api.LockException;
 import com.sciforma.psnext.api.PSException;
 import com.sciforma.psnext.api.Project;
-import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
-import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
-import fr.sciforma.apietnic.business.extractor.DateExtractor;
-import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
-import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
-import fr.sciforma.apietnic.business.extractor.ListExtractor;
-import fr.sciforma.apietnic.business.extractor.StringExtractor;
+import fr.sciforma.apietnic.business.extractor.*;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
 import fr.sciforma.apietnic.service.SciformaService;
@@ -18,9 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
 
 @Component
 public class ProjectProcessor extends AbstractProcessor<Project> {
@@ -42,13 +35,14 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
     private ListExtractor<Project> listExtractor;
     @Autowired
     private CalendarExtractor<Project> calendarExtractor;
+    @Autowired
+    private EffortExtractor<Project> effortExtractor;
 
     @Autowired
     private TaskProcessor taskProcessor;
     @Autowired
     private ResourceAssignementProcessor resourceAssignementProcessor;
 
-    @Override
     public void process(SciformaService sciformaService) {
 
         List<Project> projectList = sciformaService.getProjects();
@@ -67,19 +61,30 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
                 StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
+                Optional<Date> projectStart = Optional.empty();
+                Optional<Date> projectFinish = Optional.empty();
+
                 for (SciformaField sciformaField : getFieldsToExtract()) {
 
                     extractorMap.get(sciformaField.getType()).extractAsString(project, sciformaField.getName()).ifPresent(csvLine::add);
+
+                    if ("Start".equals(sciformaField.getName())) {
+                        projectStart = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(project, sciformaField.getName());
+                    }
+
+                    if ("Finish".equals(sciformaField.getName())) {
+                        projectFinish = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(project, sciformaField.getName());
+                    }
 
                 }
 
                 csvLines.add(csvLine.toString());
 
-                taskProcessor.process(project);
+                taskProcessor.process(project.getTaskOutlineList(), projectStart.get(), projectFinish.get());
 
                 //TODO: remove this (for testing purpose)
                 testCpt++;
-                if(testCpt > 10) {
+                if (testCpt > 10) {
                     break;
                 }
 
@@ -143,5 +148,10 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
     @Override
     public CalendarExtractor<Project> getCalendarExtractor() {
         return calendarExtractor;
+    }
+
+    @Override
+    public EffortExtractor<Project> getEffortExtractor() {
+        return effortExtractor;
     }
 }

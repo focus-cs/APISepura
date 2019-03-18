@@ -1,13 +1,8 @@
 package fr.sciforma.apietnic.business.processor;
 
+import com.sciforma.psnext.api.JobClassification;
 import com.sciforma.psnext.api.PortfolioFolder;
-import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
-import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
-import fr.sciforma.apietnic.business.extractor.DateExtractor;
-import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
-import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
-import fr.sciforma.apietnic.business.extractor.ListExtractor;
-import fr.sciforma.apietnic.business.extractor.StringExtractor;
+import fr.sciforma.apietnic.business.extractor.*;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +31,8 @@ public class PortfolioFolderProcessor extends AbstractSystemDataProcessor<Portfo
     private ListExtractor<PortfolioFolder> listExtractor;
     @Autowired
     private CalendarExtractor<PortfolioFolder> calendarExtractor;
+    @Autowired
+    private EffortExtractor<PortfolioFolder> effortExtractor;
 
     @Override
     protected Optional<PortfolioFolder> getFieldAccessors(SciformaService sciformaService) {
@@ -85,5 +82,10 @@ public class PortfolioFolderProcessor extends AbstractSystemDataProcessor<Portfo
     @Override
     public CalendarExtractor<PortfolioFolder> getCalendarExtractor() {
         return calendarExtractor;
+    }
+
+    @Override
+    public EffortExtractor<PortfolioFolder> getEffortExtractor() {
+        return effortExtractor;
     }
 }

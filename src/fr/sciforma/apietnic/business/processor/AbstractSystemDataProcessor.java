@@ -17,7 +17,6 @@ public abstract class AbstractSystemDataProcessor<T> extends AbstractProcessor<T
     protected abstract Optional<T> getFieldAccessors(SciformaService sciformaService);
     protected abstract List<T> getChildren(T fieldAccessor);
 
-    @Override
     public void process(SciformaService sciformaService) {
 
         Logger.info("Processing file " + getFilename());
