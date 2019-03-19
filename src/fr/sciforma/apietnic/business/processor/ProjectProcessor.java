@@ -81,7 +81,7 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
                 //TODO: remove this (for testing purpose)
                 testCpt++;
-                if (testCpt > 10) {
+                if (testCpt > 1) {
                     break;
                 }
 

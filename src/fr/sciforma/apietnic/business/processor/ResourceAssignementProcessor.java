@@ -26,7 +26,9 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 @Component
@@ -74,11 +76,21 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
             LocalDate startDate = start.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate endDate = end.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
+            Map<String, String> header = new HashMap<>();
+            header.put("Start", null);
+            header.put("Finish", null);
+            header.put("Effort", null);
+
+            for (SciformaField sciformaField : getFieldsToExtract()) {
+                header.put(sciformaField.getName(), null);
+            }
+
             for (ResAssignment resAssignment : resAssignmentList) {
 
                 for (LocalDate localDate = startDate; localDate.isBefore(endDate); localDate = localDate.plusDays(1)) {
 
-                    StringJoiner csvLine = new StringJoiner(csvDelimiter);
+                    Map<String, List<DoubleDatedData>> effortFields = new HashMap<>();
+                    Map<String, String> nonEffortFields = new HashMap<>();
 
                     for (SciformaField sciformaField : getFieldsToExtract()) {
 
@@ -89,18 +101,32 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
 
                             List<DoubleDatedData> datedData = resAssignment.getDatedData(sciformaField.getName(), DatedData.DAY, from, to);
 
-                            for (DoubleDatedData datedDatum : datedData) {
-                                csvLine.add(sdf.format(datedDatum.getStart()));
-                                csvLine.add(sdf.format(datedDatum.getFinish()));
-                                csvLine.add(String.valueOf(datedDatum.getData()));
-                            }
+                            effortFields.putIfAbsent(sciformaField.getName(), datedData);
 
+                            for (DoubleDatedData datedDatum : datedData) {
+                                Logger.info("START : " + sdf.format(datedDatum.getStart()));
+                                Logger.info("FINISH : " + sdf.format(datedDatum.getFinish()));
+                            }
 
                         } else {
 
-                            extractorMap.get(sciformaField.getType()).extractAsString(resAssignment, sciformaField.getName()).ifPresent(csvLine::add);
+                            extractorMap.get(sciformaField.getType()).extractAsString(resAssignment, sciformaField.getName()).ifPresent(fieldValue -> nonEffortFields.putIfAbsent(sciformaField.getName(), fieldValue));
 
                         }
+                    }
+
+                    StringJoiner csvLine = new StringJoiner(csvDelimiter);
+
+                    for (Map.Entry<String, String> entry : header.entrySet()) {
+
+                        if (effortFields.containsKey(entry.getKey())) {
+                            csvLine.add(String.valueOf(effortFields.get(entry.getKey()).get(0).getData()));
+                        }
+
+                        if(nonEffortFields.containsKey(entry.getKey())) {
+                            csvLine.add(nonEffortFields.get(entry.getKey()));
+                        }
+
                     }
 
                     csvLines.add(csvLine.toString());
