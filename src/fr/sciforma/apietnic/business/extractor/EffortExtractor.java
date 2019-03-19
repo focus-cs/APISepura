@@ -42,7 +42,7 @@ public class EffortExtractor<T extends FieldAccessor> implements Extractor<T, Li
 
     }
 
-    public Optional<List<DoubleDatedData>> extract(T fieldAccessor, String fieldName, int granularity) {
+    private Optional<List<DoubleDatedData>> extract(T fieldAccessor, String fieldName, int granularity) {
 
         try {
             return Optional.of(fieldAccessor.getDatedData(fieldName, granularity));

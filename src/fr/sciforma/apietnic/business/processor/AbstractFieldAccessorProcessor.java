@@ -6,6 +6,7 @@ import org.pmw.tinylog.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
@@ -26,7 +27,12 @@ public abstract class AbstractFieldAccessorProcessor<T> extends AbstractProcesso
 
             for (SciformaField sciformaField : getFieldsToExtract()) {
 
-                extractorMap.get(sciformaField.getType()).extractAsString(fieldAccessor, sciformaField.getName()).ifPresent(csvLine::add);
+                Optional<String> value = extractorMap.get(sciformaField.getType()).extractAsString(fieldAccessor, sciformaField.getName());
+                if (value.isPresent()) {
+                    csvLine.add(value.get());
+                } else {
+                    csvLine.add("");
+                }
 
             }
 

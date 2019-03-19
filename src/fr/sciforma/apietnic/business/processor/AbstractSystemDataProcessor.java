@@ -43,7 +43,12 @@ public abstract class AbstractSystemDataProcessor<T> extends AbstractProcessor<T
 
             for (SciformaField sciformaField : getFieldsToExtract()) {
 
-                extractorMap.get(sciformaField.getType()).extractAsString(root, sciformaField.getName()).ifPresent(csvLine::add);
+                Optional<String> value = extractorMap.get(sciformaField.getType()).extractAsString(root, sciformaField.getName());
+                if (value.isPresent()) {
+                    csvLine.add(value.get());
+                } else {
+                    csvLine.add("");
+                }
 
             }
 

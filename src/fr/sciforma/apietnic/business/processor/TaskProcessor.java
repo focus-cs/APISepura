@@ -86,7 +86,12 @@ public class TaskProcessor extends AbstractProcessor<Task> {
 
                 for (SciformaField sciformaField : getFieldsToExtract()) {
 
-                    extractorMap.get(sciformaField.getType()).extractAsString(task, sciformaField.getName()).ifPresent(csvLine::add);
+                    Optional<String> value = extractorMap.get(sciformaField.getType()).extractAsString(task, sciformaField.getName());
+                    if (value.isPresent()) {
+                        csvLine.add(value.get());
+                    } else {
+                        csvLine.add("");
+                    }
 
                     if ("Start".equals(sciformaField.getName())) {
                         taskStart = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(task, sciformaField.getName());

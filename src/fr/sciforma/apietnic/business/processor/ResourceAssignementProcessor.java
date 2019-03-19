@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -76,21 +78,15 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
             LocalDate startDate = start.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate endDate = end.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-            Map<String, String> header = new HashMap<>();
-            header.put("Start", null);
-            header.put("Finish", null);
-            header.put("Effort", null);
-
-            for (SciformaField sciformaField : getFieldsToExtract()) {
-                header.put(sciformaField.getName(), null);
-            }
-
             for (ResAssignment resAssignment : resAssignmentList) {
 
                 for (LocalDate localDate = startDate; localDate.isBefore(endDate); localDate = localDate.plusDays(1)) {
 
-                    Map<String, List<DoubleDatedData>> effortFields = new HashMap<>();
-                    Map<String, String> nonEffortFields = new HashMap<>();
+                    Map<String, String> header = new HashMap<>();
+
+                    for (String headerItem : getHeaderAsList()) {
+                        header.put(headerItem, null);
+                    }
 
                     for (SciformaField sciformaField : getFieldsToExtract()) {
 
@@ -101,33 +97,38 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
 
                             List<DoubleDatedData> datedData = resAssignment.getDatedData(sciformaField.getName(), DatedData.DAY, from, to);
 
-                            effortFields.putIfAbsent(sciformaField.getName(), datedData);
+                            if (!datedData.isEmpty()) {
 
-                            for (DoubleDatedData datedDatum : datedData) {
-                                Logger.info("START : " + sdf.format(datedDatum.getStart()));
-                                Logger.info("FINISH : " + sdf.format(datedDatum.getFinish()));
+                                header.put("Start", sdf.format(datedData.get(0).getStart()));
+                                header.put("Finish", sdf.format(datedData.get(0).getFinish()));
+                                header.put(sciformaField.getName(), String.valueOf(datedData.get(0).getData()));
+
                             }
 
                         } else {
 
-                            extractorMap.get(sciformaField.getType()).extractAsString(resAssignment, sciformaField.getName()).ifPresent(fieldValue -> nonEffortFields.putIfAbsent(sciformaField.getName(), fieldValue));
+                            extractorMap.get(sciformaField.getType()).extractAsString(resAssignment, sciformaField.getName()).ifPresent(fieldValue -> header.put(sciformaField.getName(), fieldValue));
 
                         }
                     }
 
                     StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
-                    for (Map.Entry<String, String> entry : header.entrySet()) {
+                    for (String headerItem : getHeaderAsList()) {
 
-                        if (effortFields.containsKey(entry.getKey())) {
-                            csvLine.add(String.valueOf(effortFields.get(entry.getKey()).get(0).getData()));
-                        }
+                        if (header.containsKey(headerItem)) {
 
-                        if(nonEffortFields.containsKey(entry.getKey())) {
-                            csvLine.add(nonEffortFields.get(entry.getKey()));
+                            if (header.get(headerItem) != null) {
+                                csvLine.add(header.get(headerItem));
+                            } else {
+                                csvLine.add("");
+                            }
+
                         }
 
                     }
+
+                    Logger.info(csvLine.toString());
 
                     csvLines.add(csvLine.toString());
 
@@ -136,9 +137,49 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
             }
 
         } catch (PSException e) {
+
             Logger.error(e, "Failed to retrieve resource assignement for task");
+
         }
 
+    }
+
+    @Override
+    void toCsv() {
+        String filePath = path + getFilename();
+
+        try (FileWriter fileWriter = new FileWriter(filePath)) {
+
+            StringJoiner header = new StringJoiner(csvDelimiter);
+
+            for (String headerItem : getHeaderAsList()) {
+                header.add(headerItem);
+            }
+
+            fileWriter.append(header.toString()).append("\n");
+
+            for (String csvLine : csvLines) {
+                fileWriter.append(csvLine).append("\n");
+            }
+
+            fileWriter.flush();
+
+        } catch (IOException e) {
+            Logger.error(e, "Failed to create file with path " + filePath);
+        }
+    }
+
+    private List<String> getHeaderAsList() {
+        List<String> header = new ArrayList<>();
+
+        header.add("Start");
+        header.add("Finish");
+
+        for (SciformaField sciformaField : getFieldsToExtract()) {
+            header.add(sciformaField.getName());
+        }
+
+        return header;
     }
 
     @Override

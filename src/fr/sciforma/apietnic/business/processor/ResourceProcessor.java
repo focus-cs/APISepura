@@ -75,7 +75,12 @@ public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> 
 
                 for (SciformaField sciformaField : getFieldsToExtract()) {
 
-                    extractorMap.get(sciformaField.getType()).extractAsString(fieldAccessor, sciformaField.getName()).ifPresent(csvLine::add);
+                    Optional<String> value = extractorMap.get(sciformaField.getType()).extractAsString(fieldAccessor, sciformaField.getName());
+                    if (value.isPresent()) {
+                        csvLine.add(value.get());
+                    } else {
+                        csvLine.add("");
+                    }
 
                 }
 

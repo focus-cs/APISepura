@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 @Component
@@ -71,7 +72,12 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
                 for (SciformaField sciformaField : getFieldsToExtract()) {
 
-                    extractorMap.get(sciformaField.getType()).extractAsString(project, sciformaField.getName()).ifPresent(csvLine::add);
+                    Optional<String> value = extractorMap.get(sciformaField.getType()).extractAsString(project, sciformaField.getName());
+                    if (value.isPresent()) {
+                        csvLine.add(value.get());
+                    } else {
+                        csvLine.add("");
+                    }
 
                 }
 
@@ -81,7 +87,7 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
                 //TODO: remove this (for testing purpose)
                 testCpt++;
-                if (testCpt > 1) {
+                if (testCpt > 0) {
                     break;
                 }
 
