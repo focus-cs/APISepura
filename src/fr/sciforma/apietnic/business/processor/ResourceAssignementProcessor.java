@@ -1,10 +1,20 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.*;
-import fr.sciforma.apietnic.business.extractor.*;
+import com.sciforma.psnext.api.DatedData;
+import com.sciforma.psnext.api.DoubleDatedData;
+import com.sciforma.psnext.api.PSException;
+import com.sciforma.psnext.api.ResAssignment;
+import com.sciforma.psnext.api.Task;
+import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
+import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
+import fr.sciforma.apietnic.business.extractor.DateExtractor;
+import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.EffortExtractor;
+import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
+import fr.sciforma.apietnic.business.extractor.ListExtractor;
+import fr.sciforma.apietnic.business.extractor.StringExtractor;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
-import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +24,10 @@ import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.StringJoiner;
 
 @Component
 public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignment> {
@@ -56,18 +69,12 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
 
         try {
 
-            List resAssignmentList = task.getResAssignmentList();
+            List<ResAssignment> resAssignmentList = task.getResAssignmentList();
 
-            Iterator assignementIterator = resAssignmentList.iterator();
-            while (assignementIterator.hasNext()) {
-                ResAssignment resAssignment = (ResAssignment) assignementIterator.next();
+            LocalDate startDate = start.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate endDate = end.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-                Map<String, List<DoubleDatedData>> effortsFields = new HashMap<>();
-
-                Map<String, String> nonEffortFields = new HashMap<>();
-
-                LocalDate startDate = start.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                LocalDate endDate = end.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            for (ResAssignment resAssignment : resAssignmentList) {
 
                 for (LocalDate localDate = startDate; localDate.isBefore(endDate); localDate = localDate.plusDays(1)) {
 

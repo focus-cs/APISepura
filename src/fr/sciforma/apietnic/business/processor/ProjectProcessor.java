@@ -1,10 +1,16 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.JobClassification;
 import com.sciforma.psnext.api.LockException;
 import com.sciforma.psnext.api.PSException;
 import com.sciforma.psnext.api.Project;
-import fr.sciforma.apietnic.business.extractor.*;
+import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
+import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
+import fr.sciforma.apietnic.business.extractor.DateExtractor;
+import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.EffortExtractor;
+import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
+import fr.sciforma.apietnic.business.extractor.ListExtractor;
+import fr.sciforma.apietnic.business.extractor.StringExtractor;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
 import fr.sciforma.apietnic.service.SciformaService;
@@ -13,7 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
 
 @Component
 public class ProjectProcessor extends AbstractProcessor<Project> {
@@ -61,26 +69,15 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
                 StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
-                Optional<Date> projectStart = Optional.empty();
-                Optional<Date> projectFinish = Optional.empty();
-
                 for (SciformaField sciformaField : getFieldsToExtract()) {
 
                     extractorMap.get(sciformaField.getType()).extractAsString(project, sciformaField.getName()).ifPresent(csvLine::add);
-
-                    if ("Start".equals(sciformaField.getName())) {
-                        projectStart = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(project, sciformaField.getName());
-                    }
-
-                    if ("Finish".equals(sciformaField.getName())) {
-                        projectFinish = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(project, sciformaField.getName());
-                    }
 
                 }
 
                 csvLines.add(csvLine.toString());
 
-                taskProcessor.process(project.getTaskOutlineList(), projectStart.get(), projectFinish.get());
+                taskProcessor.process(project.getTaskOutlineList());
 
                 //TODO: remove this (for testing purpose)
                 testCpt++;

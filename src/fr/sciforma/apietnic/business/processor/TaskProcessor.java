@@ -2,6 +2,7 @@ package fr.sciforma.apietnic.business.processor;
 
 import com.sciforma.psnext.api.*;
 import fr.sciforma.apietnic.business.extractor.*;
+import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class TaskProcessor extends AbstractProcessor<Task> {
         return filename;
     }
 
-    protected void process(List<TaskOutlineList> tasks, Date projectStart, Date projectEnd) {
+    protected void process(List<TaskOutlineList> tasks) {
 
         try {
 
@@ -56,8 +57,8 @@ public class TaskProcessor extends AbstractProcessor<Task> {
             while (taskTterator.hasNext()) {
                 Task task = (Task) taskTterator.next();
 
-                parseTask(task.getSuccessorLinksList(), projectStart, projectEnd);
-                parseTask(task.getPredecessorLinksList(), projectStart, projectEnd);
+                parseTask(task.getSuccessorLinksList());
+                parseTask(task.getPredecessorLinksList());
             }
 
 
@@ -67,7 +68,7 @@ public class TaskProcessor extends AbstractProcessor<Task> {
 
     }
 
-    private void parseTask(List<Task> tasks, Date start, Date end) {
+    private void parseTask(List<Task> tasks) {
 
         Iterator taskIterator = tasks.iterator();
 
@@ -80,31 +81,27 @@ public class TaskProcessor extends AbstractProcessor<Task> {
 
                 StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
-                Optional<Double> taskDuration = Optional.empty();
-
-//                Optional<Date> start = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(task, "Start");
-//                Optional<Date> finish = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(task, "Finish");
-//
-//                taskDuration = (Optional<Double>) extractorMap.get(FieldType.DURATION).extract(task, "Duration");
-//
-//                if(start.isPresent() && finish.isPresent() && taskDuration.isPresent()) {
-//                    Logger.info("Start : " + start.get());
-//                    Logger.info("Finish : " + finish.get());
-//                    Logger.info("Duration : " + taskDuration.get());
-//                }
+                Optional<Date> taskStart = Optional.empty();
+                Optional<Date> taskFinish = Optional.empty();
 
                 for (SciformaField sciformaField : getFieldsToExtract()) {
 
                     extractorMap.get(sciformaField.getType()).extractAsString(task, sciformaField.getName()).ifPresent(csvLine::add);
 
-                    if ("Duration".equals(sciformaField.getName())) {
-                        taskDuration = (Optional<Double>) extractorMap.get(sciformaField.getType()).extract(task, sciformaField.getName());
+                    if ("Start".equals(sciformaField.getName())) {
+                        taskStart = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(task, sciformaField.getName());
+                    }
+
+                    if ("Finish".equals(sciformaField.getName())) {
+                        taskFinish = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(task, sciformaField.getName());
                     }
                 }
 
                 csvLines.add(csvLine.toString());
 
-                taskDuration.ifPresent(duration -> resourceAssignementProcessor.process(task, start, end));
+                if (taskStart.isPresent() && taskFinish.isPresent()) {
+                    resourceAssignementProcessor.process(task, taskStart.get(), taskFinish.get());
+                }
 
             } catch (PSException e) {
                 Logger.error(e, "Failed to retrieve task");

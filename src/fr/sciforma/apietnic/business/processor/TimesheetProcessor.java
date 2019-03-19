@@ -1,10 +1,16 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.JobClassification;
 import com.sciforma.psnext.api.Resource;
 import com.sciforma.psnext.api.Timesheet;
 import com.sciforma.psnext.api.TimesheetAssignment;
-import fr.sciforma.apietnic.business.extractor.*;
+import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
+import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
+import fr.sciforma.apietnic.business.extractor.DateExtractor;
+import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.EffortExtractor;
+import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
+import fr.sciforma.apietnic.business.extractor.ListExtractor;
+import fr.sciforma.apietnic.business.extractor.StringExtractor;
 import fr.sciforma.apietnic.business.model.SciformaField;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +18,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.StringJoiner;
 
 @Component
 public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
