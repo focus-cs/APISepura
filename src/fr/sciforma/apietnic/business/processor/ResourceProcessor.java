@@ -16,9 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.sql.Date;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,14 +54,6 @@ public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> 
 
         StringJoiner csvLine;
 
-        LocalDate startOfYear = LocalDate.now()
-                .withMonth(1)
-                .withDayOfMonth(1);
-
-        LocalDate endOfYear = LocalDate.now()
-                .withMonth(1)
-                .withDayOfMonth(2);
-
         for (Resource fieldAccessor : getFieldAccessors(sciformaService)) {
 
             csvLine = new StringJoiner(csvDelimiter);
@@ -88,7 +77,7 @@ public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> 
 
             }
 
-            timesheetProcessor.process(fieldAccessor, Date.from(startOfYear.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()), Date.from(endOfYear.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()), sciformaService);
+            timesheetProcessor.process(sciformaService, fieldAccessor);
 
         }
 

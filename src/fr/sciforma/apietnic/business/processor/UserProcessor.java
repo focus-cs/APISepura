@@ -84,6 +84,9 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
 
             }
 
+            // TODO: remove this, for testing purpose
+            break;
+
         }
 
         Map<Double, String> resourcesById = resourceProcessor.getResourcesById(sciformaService);

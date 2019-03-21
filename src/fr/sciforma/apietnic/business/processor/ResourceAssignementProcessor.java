@@ -128,8 +128,6 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
 
                     }
 
-                    Logger.info(csvLine.toString());
-
                     csvLines.add(csvLine.toString());
 
                 }
