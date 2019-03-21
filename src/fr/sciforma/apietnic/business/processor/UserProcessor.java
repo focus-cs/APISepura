@@ -1,14 +1,7 @@
 package fr.sciforma.apietnic.business.processor;
 
 import com.sciforma.psnext.api.User;
-import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
-import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
-import fr.sciforma.apietnic.business.extractor.DateExtractor;
-import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
-import fr.sciforma.apietnic.business.extractor.EffortExtractor;
-import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
-import fr.sciforma.apietnic.business.extractor.ListExtractor;
-import fr.sciforma.apietnic.business.extractor.StringExtractor;
+import fr.sciforma.apietnic.business.extractor.*;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
 import fr.sciforma.apietnic.service.SciformaService;
@@ -17,14 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.StringJoiner;
+import java.util.*;
 
 @Component
 public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
@@ -91,62 +77,20 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
 
         Map<Double, String> resourcesById = resourceProcessor.getResourcesById(sciformaService);
 
-        csvLines = new ArrayList<>();
-
         for (Map.Entry<Double, String> entry : userById.entrySet()) {
 
             csvLine = new StringJoiner(csvDelimiter);
             csvLine.add(entry.getValue());
 
-            if(resourcesById.containsKey(entry.getKey())) {
+            if (resourcesById.containsKey(entry.getKey())) {
                 csvLine.add(resourcesById.get(entry.getKey()));
             }
 
-            csvLines.add(csvLine.toString());
+            csvHelper.addLine(csvLine.toString());
 
         }
-
-        toCsv();
 
         Logger.info("File " + getFilename() + " has been processed successfully");
-    }
-
-    @Override
-    void toCsv() {
-
-        String filePath = path + getFilename();
-
-        try (FileWriter fileWriter = new FileWriter(filePath)) {
-
-            StringJoiner header = new StringJoiner(csvDelimiter);
-
-            // Add header for users
-            for (SciformaField sciformaField : getFieldsToExtract()) {
-                header.add(sciformaField.getName());
-            }
-
-            // Add header for resources
-            for (SciformaField sciformaField : resourceProcessor.getFieldsToExtract()) {
-                header.add(sciformaField.getName());
-            }
-
-            fileWriter.append(header.toString()).append("\n");
-
-            for (String csvLine : csvLines) {
-                fileWriter.append(csvLine).append("\n");
-            }
-
-            fileWriter.flush();
-
-        } catch (IOException e) {
-            Logger.error(e, "Failed to create file with path " + filePath);
-        }
-
-    }
-
-    @Override
-    protected String getFilename() {
-        return filename;
     }
 
     @Override

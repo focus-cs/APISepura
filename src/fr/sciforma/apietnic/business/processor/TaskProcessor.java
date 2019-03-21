@@ -15,9 +15,6 @@ import java.util.*;
 @Component
 public class TaskProcessor extends AbstractProcessor<Task> {
 
-    @Value("${filename.tasks}")
-    private String filename;
-
     @Autowired
     private StringExtractor<Task> stringExtractor;
     @Autowired
@@ -37,17 +34,6 @@ public class TaskProcessor extends AbstractProcessor<Task> {
 
     @Autowired
     private ResourceAssignementProcessor resourceAssignementProcessor;
-
-    @PostConstruct
-    public void postConstruct() {
-        super.postConstruct();
-        csvLines = new ArrayList<>();
-    }
-
-    @Override
-    protected String getFilename() {
-        return filename;
-    }
 
     protected void process(List<TaskOutlineList> tasks) {
 
@@ -102,7 +88,7 @@ public class TaskProcessor extends AbstractProcessor<Task> {
                     }
                 }
 
-                csvLines.add(csvLine.toString());
+                csvHelper.addLine(csvLine.toString());
 
                 if (taskStart.isPresent() && taskFinish.isPresent()) {
                     resourceAssignementProcessor.process(task, taskStart.get(), taskFinish.get());

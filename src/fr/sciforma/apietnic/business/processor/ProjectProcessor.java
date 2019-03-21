@@ -56,8 +56,6 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
         List<Project> projectList = sciformaService.getProjects();
 
-        csvLines = new ArrayList<>();
-
         int testCpt = 0;
 
         for (Project project : projectList) {
@@ -81,7 +79,7 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
                 }
 
-                csvLines.add(csvLine.toString());
+                csvHelper.addLine(csvLine.toString());
 
                 taskProcessor.process(project.getTaskOutlineList());
 
@@ -107,15 +105,6 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
         }
 
-        toCsv();
-        taskProcessor.toCsv();
-        resourceAssignementProcessor.toCsv();
-
-    }
-
-    @Override
-    protected String getFilename() {
-        return filename;
     }
 
     @Override

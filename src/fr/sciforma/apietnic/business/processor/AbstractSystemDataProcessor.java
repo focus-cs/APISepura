@@ -23,11 +23,7 @@ public abstract class AbstractSystemDataProcessor<T> extends AbstractProcessor<T
 
         Optional<T> skills = getFieldAccessors(sciformaService);
 
-        csvLines = new ArrayList<>();
-
         skills.ifPresent(this::parse);
-
-        toCsv();
 
         Logger.info("File " + getFilename() + " has been processed successfully");
 
@@ -52,7 +48,7 @@ public abstract class AbstractSystemDataProcessor<T> extends AbstractProcessor<T
 
             }
 
-            csvLines.add(csvLine.toString());
+            csvHelper.addLine(csvLine.toString());
 
         } else {
 

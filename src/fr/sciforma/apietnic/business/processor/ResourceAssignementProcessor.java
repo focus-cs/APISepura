@@ -1,43 +1,21 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.DatedData;
-import com.sciforma.psnext.api.DoubleDatedData;
-import com.sciforma.psnext.api.PSException;
-import com.sciforma.psnext.api.ResAssignment;
-import com.sciforma.psnext.api.Task;
-import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
-import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
-import fr.sciforma.apietnic.business.extractor.DateExtractor;
-import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
-import fr.sciforma.apietnic.business.extractor.EffortExtractor;
-import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
-import fr.sciforma.apietnic.business.extractor.ListExtractor;
-import fr.sciforma.apietnic.business.extractor.StringExtractor;
+import com.sciforma.psnext.api.*;
+import fr.sciforma.apietnic.business.csv.CsvHelper;
+import fr.sciforma.apietnic.business.extractor.*;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.util.*;
 
 @Component
 public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignment> {
-
-    @Value("${filename.resAssignements}")
-    private String filename;
 
     @Autowired
     private StringExtractor<ResAssignment> stringExtractor;
@@ -56,17 +34,6 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
     @Autowired
     private EffortExtractor<ResAssignment> effortExtractor;
 
-    @PostConstruct
-    public void postConstruct() {
-        super.postConstruct();
-        csvLines = new ArrayList<>();
-    }
-
-    @Override
-    protected String getFilename() {
-        return filename;
-    }
-
     protected void process(Task task, Date start, Date end) {
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
@@ -84,7 +51,7 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
 
                     Map<String, String> header = new HashMap<>();
 
-                    for (String headerItem : getHeaderAsList()) {
+                    for (String headerItem : csvHelper.getHeaderAsList()) {
                         header.put(headerItem, null);
                     }
 
@@ -99,8 +66,8 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
 
                             if (!datedData.isEmpty()) {
 
-                                header.put("Start", sdf.format(datedData.get(0).getStart()));
-                                header.put("Finish", sdf.format(datedData.get(0).getFinish()));
+                                header.put(CsvHelper.START_HEADER, sdf.format(datedData.get(0).getStart()));
+                                header.put(CsvHelper.FINISH_HEADER, sdf.format(datedData.get(0).getFinish()));
                                 header.put(sciformaField.getName(), String.valueOf(datedData.get(0).getData()));
 
                             }
@@ -114,7 +81,7 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
 
                     StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
-                    for (String headerItem : getHeaderAsList()) {
+                    for (String headerItem : csvHelper.getHeaderAsList()) {
 
                         if (header.containsKey(headerItem)) {
 
@@ -128,7 +95,7 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
 
                     }
 
-                    csvLines.add(csvLine.toString());
+                    csvHelper.addLine(csvLine.toString());
 
                 }
 
@@ -140,44 +107,6 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
 
         }
 
-    }
-
-    @Override
-    void toCsv() {
-        String filePath = path + getFilename();
-
-        try (FileWriter fileWriter = new FileWriter(filePath)) {
-
-            StringJoiner header = new StringJoiner(csvDelimiter);
-
-            for (String headerItem : getHeaderAsList()) {
-                header.add(headerItem);
-            }
-
-            fileWriter.append(header.toString()).append("\n");
-
-            for (String csvLine : csvLines) {
-                fileWriter.append(csvLine).append("\n");
-            }
-
-            fileWriter.flush();
-
-        } catch (IOException e) {
-            Logger.error(e, "Failed to create file with path " + filePath);
-        }
-    }
-
-    private List<String> getHeaderAsList() {
-        List<String> header = new ArrayList<>();
-
-        header.add("Start");
-        header.add("Finish");
-
-        for (SciformaField sciformaField : getFieldsToExtract()) {
-            header.add(sciformaField.getName());
-        }
-
-        return header;
     }
 
     @Override

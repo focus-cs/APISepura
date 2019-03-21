@@ -1,4 +1,4 @@
-package fr.sciforma.apietnic.business.factory;
+package fr.sciforma.apietnic.business.provider;
 
 import com.sciforma.psnext.api.Project;
 import fr.sciforma.apietnic.business.model.FieldType;
@@ -12,7 +12,7 @@ import java.util.List;
 
 @Component
 @Getter
-public class ProjectExtractorFactory implements ExtractorFactory<Project> {
+public class ProjectFieldProvider implements FieldProvider<Project> {
 
     private List<SciformaField> fields;
 

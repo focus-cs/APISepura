@@ -1,6 +1,6 @@
-package fr.sciforma.apietnic.business.factory;
+package fr.sciforma.apietnic.business.provider;
 
-import com.sciforma.psnext.api.Organization;
+import com.sciforma.psnext.api.Skill;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import java.util.List;
 
 @Component
 @Getter
-public class OrganizationExtractorFactory implements ExtractorFactory<Organization> {
+public class SkillFieldProvider implements FieldProvider<Skill> {
 
     private List<SciformaField> fields;
 
@@ -21,11 +21,6 @@ public class OrganizationExtractorFactory implements ExtractorFactory<Organizati
         fields = new ArrayList<>();
         fields.add(SciformaField.builder().name("Description").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Internal ID").type(FieldType.DECIMAL).build());
-        fields.add(SciformaField.builder().name("Manager 1").type(FieldType.USER).build());
-        fields.add(SciformaField.builder().name("Manager 2").type(FieldType.USER).build());
-        fields.add(SciformaField.builder().name("Manager 3").type(FieldType.USER).build());
         fields.add(SciformaField.builder().name("Name").type(FieldType.STRING).build());
-        fields.add(SciformaField.builder().name("Organization Code").type(FieldType.STRING).build());
-        fields.add(SciformaField.builder().name("Responsable 4").type(FieldType.USER).build());
     }
 }

@@ -1,4 +1,4 @@
-package fr.sciforma.apietnic.business.factory;
+package fr.sciforma.apietnic.business.provider;
 
 import com.sciforma.psnext.api.ResAssignment;
 import fr.sciforma.apietnic.business.model.FieldType;
@@ -12,7 +12,7 @@ import java.util.List;
 
 @Component
 @Getter
-public class ResourceAssignementExtractorFactory implements ExtractorFactory<ResAssignment> {
+public class ResourceAssignementFieldProvider implements FieldProvider<ResAssignment> {
 
     private List<SciformaField> fields;
 

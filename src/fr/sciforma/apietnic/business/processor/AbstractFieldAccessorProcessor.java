@@ -17,9 +17,7 @@ public abstract class AbstractFieldAccessorProcessor<T> extends AbstractProcesso
     protected abstract List<T> getFieldAccessors(SciformaService sciformaService);
 
     public void process(SciformaService sciformaService) {
-        Logger.info("Processing file " + getFilename());
-
-        csvLines = new ArrayList<>();
+        Logger.info("Processing file ");
 
         for (T fieldAccessor : getFieldAccessors(sciformaService)) {
 
@@ -36,10 +34,8 @@ public abstract class AbstractFieldAccessorProcessor<T> extends AbstractProcesso
 
             }
 
-            csvLines.add(csvLine.toString());
+            csvHelper.addLine(csvLine.toString());
         }
-
-        toCsv();
 
         Logger.info("File " + getFilename() + " has been processed successfully");
     }

@@ -1,4 +1,4 @@
-package fr.sciforma.apietnic.business.factory;
+package fr.sciforma.apietnic.business.provider;
 
 import com.sciforma.psnext.api.Task;
 import fr.sciforma.apietnic.business.model.FieldType;
@@ -12,7 +12,7 @@ import java.util.List;
 
 @Component
 @Getter
-public class TaskExtractorFactory implements ExtractorFactory<Task> {
+public class TaskFieldProvider implements FieldProvider<Task> {
 
     private List<SciformaField> fields;
 

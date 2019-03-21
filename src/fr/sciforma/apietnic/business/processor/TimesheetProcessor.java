@@ -1,44 +1,22 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.DatedData;
-import com.sciforma.psnext.api.DoubleDatedData;
-import com.sciforma.psnext.api.PSException;
-import com.sciforma.psnext.api.Resource;
-import com.sciforma.psnext.api.Timesheet;
-import com.sciforma.psnext.api.TimesheetAssignment;
-import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
-import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
-import fr.sciforma.apietnic.business.extractor.DateExtractor;
-import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
-import fr.sciforma.apietnic.business.extractor.EffortExtractor;
-import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
-import fr.sciforma.apietnic.business.extractor.ListExtractor;
-import fr.sciforma.apietnic.business.extractor.StringExtractor;
+import com.sciforma.psnext.api.*;
+import fr.sciforma.apietnic.business.csv.CsvHelper;
+import fr.sciforma.apietnic.business.extractor.*;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.StringJoiner;
+import java.util.*;
 
 @Component
 public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
-
-    @Value("${filename.timesheets}")
-    private String filename;
 
     @Autowired
     private StringExtractor<TimesheetAssignment> stringExtractor;
@@ -56,12 +34,6 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
     private CalendarExtractor<TimesheetAssignment> calendarExtractor;
     @Autowired
     private EffortExtractor<TimesheetAssignment> effortExtractor;
-
-    @PostConstruct
-    public void postConstruct() {
-        super.postConstruct();
-        csvLines = new ArrayList<>();
-    }
 
     protected void process(SciformaService sciformaService, Resource resource) {
 
@@ -83,9 +55,11 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
 
         try {
 
+            Logger.info("Processing timesheet from resource " + resource.getStringField("Name"));
+
             Optional<Timesheet> timesheet = sciformaService.getTimesheet(resource, startOfYear, endOfYear);
 
-            if(timesheet.isPresent()) {
+            if (timesheet.isPresent()) {
                 List<TimesheetAssignment> timesheetAssignmentList = timesheet.get().getTimesheetAssignmentList();
 
                 LocalDate startDate = startOfYear.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -97,7 +71,7 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
 
                         Map<String, String> header = new HashMap<>();
 
-                        for (String headerItem : getHeaderAsList()) {
+                        for (String headerItem : csvHelper.getHeaderAsList()) {
                             header.put(headerItem, null);
                         }
 
@@ -112,8 +86,8 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
 
                                 if (!datedData.isEmpty()) {
 
-                                    header.put("Start", sdf.format(datedData.get(0).getStart()));
-                                    header.put("Finish", sdf.format(datedData.get(0).getFinish()));
+                                    header.put(CsvHelper.START_HEADER, sdf.format(datedData.get(0).getStart()));
+                                    header.put(CsvHelper.FINISH_HEADER, sdf.format(datedData.get(0).getFinish()));
                                     header.put(sciformaField.getName(), String.valueOf(datedData.get(0).getData()));
 
                                 }
@@ -125,23 +99,28 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
                             }
                         }
 
-                        StringJoiner csvLine = new StringJoiner(csvDelimiter);
+                        // If no distributed value, skip the line
+                        if(header.get(CsvHelper.START_HEADER) != null && ! header.get(CsvHelper.START_HEADER).isEmpty()) {
 
-                        for (String headerItem : getHeaderAsList()) {
+                            StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
-                            if (header.containsKey(headerItem)) {
+                            for (String headerItem : csvHelper.getHeaderAsList()) {
 
-                                if (header.get(headerItem) != null) {
-                                    csvLine.add(header.get(headerItem));
-                                } else {
-                                    csvLine.add("");
+                                if (header.containsKey(headerItem)) {
+
+                                    if (header.get(headerItem) != null) {
+                                        csvLine.add(header.get(headerItem));
+                                    } else {
+                                        csvLine.add("");
+                                    }
+
                                 }
 
                             }
 
-                        }
+                            csvHelper.addLine(csvLine.toString());
 
-                        csvLines.add(csvLine.toString());
+                        }
 
                     }
 
@@ -151,23 +130,10 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
 
         } catch (PSException e) {
 
-            Logger.error(e, "Failed to retrieve resource assignement for task");
+            Logger.error(e, "Failed to retrieve timesheet assignement for resource");
 
         }
 
-    }
-
-    private List<String> getHeaderAsList() {
-        List<String> header = new ArrayList<>();
-
-        header.add("Start");
-        header.add("Finish");
-
-        for (SciformaField sciformaField : getFieldsToExtract()) {
-            header.add(sciformaField.getName());
-        }
-
-        return header;
     }
 
     @Override
@@ -210,8 +176,4 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
         return effortExtractor;
     }
 
-    @Override
-    protected String getFilename() {
-        return filename;
-    }
 }

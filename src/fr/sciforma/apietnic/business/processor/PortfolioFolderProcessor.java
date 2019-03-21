@@ -20,9 +20,6 @@ import java.util.Optional;
 @Component
 public class PortfolioFolderProcessor extends AbstractSystemDataProcessor<PortfolioFolder> {
 
-    @Value("${filename.portfolioFolders}")
-    private String filename;
-
     @Autowired
     private StringExtractor<PortfolioFolder> stringExtractor;
     @Autowired
@@ -48,11 +45,6 @@ public class PortfolioFolderProcessor extends AbstractSystemDataProcessor<Portfo
     @Override
     protected List<PortfolioFolder> getChildren(PortfolioFolder fieldAccessor) {
         return fieldAccessor.getChildren();
-    }
-
-    @Override
-    protected String getFilename() {
-        return filename;
     }
 
     @Override

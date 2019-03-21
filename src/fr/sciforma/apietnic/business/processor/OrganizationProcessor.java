@@ -20,9 +20,6 @@ import java.util.Optional;
 @Component
 public class OrganizationProcessor extends AbstractSystemDataProcessor<Organization> {
 
-    @Value("${filename.organizations}")
-    private String filename;
-
     @Autowired
     private StringExtractor<Organization> stringExtractor;
     @Autowired
@@ -48,11 +45,6 @@ public class OrganizationProcessor extends AbstractSystemDataProcessor<Organizat
     @Override
     protected List<Organization> getChildren(Organization fieldAccessor) {
         return fieldAccessor.getChildren();
-    }
-
-    @Override
-    protected String getFilename() {
-        return filename;
     }
 
     @Override

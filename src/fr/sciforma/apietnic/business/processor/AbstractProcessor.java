@@ -1,35 +1,28 @@
 package fr.sciforma.apietnic.business.processor;
 
+import fr.sciforma.apietnic.business.csv.CsvHelper;
 import fr.sciforma.apietnic.business.extractor.*;
-import fr.sciforma.apietnic.business.factory.ExtractorFactory;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
-import org.pmw.tinylog.Logger;
+import fr.sciforma.apietnic.business.provider.FieldProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.PostConstruct;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 
 public abstract class AbstractProcessor<T> {
 
     @Value("${csv.delimiter}")
     protected String csvDelimiter;
-    @Value("${csv.path}")
-    protected String path;
     @Autowired
-    ExtractorFactory<T> extractorFactory;
+    FieldProvider<T> fieldProvider;
+    @Autowired
+    CsvHelper<T> csvHelper;
 
     Map<FieldType, Extractor<? super T, ?>> extractorMap = new EnumMap<>(FieldType.class);
-
-    List<String> csvLines;
-
-    protected abstract String getFilename();
 
     @PostConstruct
     public void postConstruct() {
@@ -50,34 +43,8 @@ public abstract class AbstractProcessor<T> {
         extractorMap.putIfAbsent(FieldType.LIST, getListExtractor());
     }
 
-    void toCsv() {
-
-        String filePath = path + getFilename();
-
-        try (FileWriter fileWriter = new FileWriter(filePath)) {
-
-            StringJoiner header = new StringJoiner(csvDelimiter);
-
-            for (SciformaField field : getFieldsToExtract()) {
-                header.add(field.getName());
-            }
-
-            fileWriter.append(header.toString()).append("\n");
-
-            for (String csvLine : csvLines) {
-                fileWriter.append(csvLine).append("\n");
-            }
-
-            fileWriter.flush();
-
-        } catch (IOException e) {
-            Logger.error(e, "Failed to create file with path " + filePath);
-        }
-
-    }
-
-    public List<SciformaField> getFieldsToExtract() {
-        return extractorFactory.getFields();
+    List<SciformaField> getFieldsToExtract() {
+        return fieldProvider.getFields();
     }
     public abstract StringExtractor<? super T> getStringExtractor();
     public abstract DecimalExtractor<? super T> getDecimalExtractor();

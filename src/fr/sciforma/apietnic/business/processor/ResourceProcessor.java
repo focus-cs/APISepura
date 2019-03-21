@@ -25,9 +25,6 @@ import java.util.StringJoiner;
 @Component
 public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> {
 
-    @Value("${filename.resources}")
-    private String filename;
-
     @Autowired
     private StringExtractor<Resource> stringExtractor;
     @Autowired
@@ -54,6 +51,8 @@ public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> 
 
         StringJoiner csvLine;
 
+        int cpt = 0;
+
         for (Resource fieldAccessor : getFieldAccessors(sciformaService)) {
 
             csvLine = new StringJoiner(csvDelimiter);
@@ -79,16 +78,15 @@ public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> 
 
             timesheetProcessor.process(sciformaService, fieldAccessor);
 
+            // TODO:remove this, for testing purpose
+            if (cpt > 10) {
+                break;
+            }
+            cpt++;
+
         }
 
-        timesheetProcessor.toCsv();
-
         return resourcesById;
-    }
-
-    @Override
-    protected String getFilename() {
-        return filename;
     }
 
     @Override

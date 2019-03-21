@@ -13,9 +13,6 @@ import java.util.Optional;
 @Component
 public class JobClassificationProcessor extends AbstractSystemDataProcessor<JobClassification> {
 
-    @Value("${filename.jobClassifications}")
-    private String filename;
-
     @Autowired
     private StringExtractor<JobClassification> stringExtractor;
     @Autowired
@@ -41,11 +38,6 @@ public class JobClassificationProcessor extends AbstractSystemDataProcessor<JobC
     @Override
     protected List<JobClassification> getChildren(JobClassification fieldAccessor) {
         return fieldAccessor.getChildren();
-    }
-
-    @Override
-    protected String getFilename() {
-        return filename;
     }
 
     @Override

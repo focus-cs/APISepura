@@ -1,4 +1,4 @@
-package fr.sciforma.apietnic.business.factory;
+package fr.sciforma.apietnic.business.provider;
 
 import com.sciforma.psnext.api.TimesheetAssignment;
 import fr.sciforma.apietnic.business.model.FieldType;
@@ -12,7 +12,7 @@ import java.util.List;
 
 @Component
 @Getter
-public class TimesheetExtractorFactory implements ExtractorFactory<TimesheetAssignment> {
+public class TimesheetFieldProvider implements FieldProvider<TimesheetAssignment> {
 
     private List<SciformaField> fields;
 
@@ -34,7 +34,7 @@ public class TimesheetExtractorFactory implements ExtractorFactory<TimesheetAssi
         fields.add(SciformaField.builder().name("Project ID").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Project IID").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("Project Name").type(FieldType.STRING).build());
-        fields.add(SciformaField.builder().name("Remaining Effort").type(FieldType.EFFORT).build());
+        fields.add(SciformaField.builder().name("Remaining Effort").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("Remaining Estimate").type(FieldType.DURATION).build());
         fields.add(SciformaField.builder().name("Resource").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Resource IID").type(FieldType.DECIMAL).build());
