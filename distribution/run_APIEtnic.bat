@@ -1,6 +1,6 @@
 set BATCH_PATH=D:/path/to/API
 set SCIFORMA_URL=http://www.psnext.dev.etnic.be
-set BATCH_MAIN=APIEtnic.jar
+set BATCH_MAIN=APIEtnicExtract.jar
 
 set ROOT_DIR=%BATCH_PATH%
 set LIB_DIR=%ROOT_DIR%/lib

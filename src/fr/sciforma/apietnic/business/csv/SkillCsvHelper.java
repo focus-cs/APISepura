@@ -11,7 +11,7 @@ public class SkillCsvHelper extends AbstractCsvHelper<Skill> {
     private String filename;
 
     @Override
-    protected String getFilename() {
+    public String getFilename() {
         return filename;
     }
 

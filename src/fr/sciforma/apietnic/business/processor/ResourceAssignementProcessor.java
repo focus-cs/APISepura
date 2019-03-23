@@ -1,18 +1,24 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.*;
-import fr.sciforma.apietnic.business.csv.CsvHelper;
-import fr.sciforma.apietnic.business.extractor.*;
-import fr.sciforma.apietnic.business.model.FieldType;
-import fr.sciforma.apietnic.business.model.SciformaField;
+import com.sciforma.psnext.api.PSException;
+import com.sciforma.psnext.api.ResAssignment;
+import com.sciforma.psnext.api.Task;
+import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
+import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
+import fr.sciforma.apietnic.business.extractor.DateExtractor;
+import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.EffortExtractor;
+import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
+import fr.sciforma.apietnic.business.extractor.ListExtractor;
+import fr.sciforma.apietnic.business.extractor.StringExtractor;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 
 @Component
 public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignment> {
@@ -36,9 +42,13 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
 
     protected void process(Task task, Date start, Date end) {
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        String taskName = null;
 
         try {
+
+            taskName = task.getStringField("Name");
+
+            Logger.info("Processing resource assignement for task " + taskName);
 
             List<ResAssignment> resAssignmentList = task.getResAssignmentList();
 
@@ -49,62 +59,20 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
 
                 for (LocalDate localDate = startDate; localDate.isBefore(endDate); localDate = localDate.plusDays(1)) {
 
-                    Map<String, String> header = new HashMap<>();
-
-                    for (String headerItem : csvHelper.getHeaderAsList()) {
-                        header.put(headerItem, null);
-                    }
-
-                    for (SciformaField sciformaField : getFieldsToExtract()) {
-
-                        if (sciformaField.getType().equals(FieldType.EFFORT)) {
-
-                            Date from = Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-                            Date to = Date.from(localDate.plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-
-                            List<DoubleDatedData> datedData = resAssignment.getDatedData(sciformaField.getName(), DatedData.DAY, from, to);
-
-                            if (!datedData.isEmpty()) {
-
-                                header.put(CsvHelper.START_HEADER, sdf.format(datedData.get(0).getStart()));
-                                header.put(CsvHelper.FINISH_HEADER, sdf.format(datedData.get(0).getFinish()));
-                                header.put(sciformaField.getName(), String.valueOf(datedData.get(0).getData()));
-
-                            }
-
-                        } else {
-
-                            extractorMap.get(sciformaField.getType()).extractAsString(resAssignment, sciformaField.getName()).ifPresent(fieldValue -> header.put(sciformaField.getName(), fieldValue));
-
-                        }
-                    }
-
-                    StringJoiner csvLine = new StringJoiner(csvDelimiter);
-
-                    for (String headerItem : csvHelper.getHeaderAsList()) {
-
-                        if (header.containsKey(headerItem)) {
-
-                            if (header.get(headerItem) != null) {
-                                csvLine.add(header.get(headerItem));
-                            } else {
-                                csvLine.add("");
-                            }
-
-                        }
-
-                    }
-
-                    csvHelper.addLine(csvLine.toString());
+                    buildTimeDistributedCsvLine(resAssignment, localDate).ifPresent(csvHelper::addLine);
 
                 }
 
             }
 
+            Logger.info("Resource assignement for task " + taskName + " have been processed successfully");
+
         } catch (PSException e) {
 
-            Logger.error(e, "Failed to retrieve resource assignement for task");
+            Logger.error(e, "Failed to retrieve resource assignement for task " + taskName);
 
+        } finally {
+            csvHelper.flush();
         }
 
     }

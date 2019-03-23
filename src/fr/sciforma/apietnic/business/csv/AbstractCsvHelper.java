@@ -63,6 +63,11 @@ public abstract class AbstractCsvHelper<T> implements CsvHelper<T> {
     }
 
     @Override
+    public void flush() {
+        writeToFile();
+    }
+
+    @Override
     public List<String> getHeaderAsList() {
         return getHeader();
     }
@@ -96,7 +101,5 @@ public abstract class AbstractCsvHelper<T> implements CsvHelper<T> {
             Logger.error(e, "Failed to create file with path " + filePath);
         }
     }
-
-    protected abstract String getFilename();
 
 }

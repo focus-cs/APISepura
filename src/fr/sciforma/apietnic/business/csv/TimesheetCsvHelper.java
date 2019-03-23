@@ -15,7 +15,7 @@ public class TimesheetCsvHelper extends AbstractCsvHelper<TimesheetAssignment> {
     private String filename;
 
     @Override
-    protected String getFilename() {
+    public String getFilename() {
         return filename;
     }
 

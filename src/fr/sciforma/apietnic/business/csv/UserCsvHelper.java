@@ -20,7 +20,7 @@ public class UserCsvHelper extends AbstractCsvHelper<User> {
     private ResourceFieldProvider resourceFieldProvider;
 
     @Override
-    protected String getFilename() {
+    public String getFilename() {
         return filename;
     }
 

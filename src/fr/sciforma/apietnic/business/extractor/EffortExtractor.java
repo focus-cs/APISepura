@@ -5,6 +5,7 @@ import com.sciforma.psnext.api.DoubleDatedData;
 import com.sciforma.psnext.api.FieldAccessor;
 import com.sciforma.psnext.api.PSException;
 import org.pmw.tinylog.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Iterator;
@@ -15,18 +16,16 @@ import java.util.StringJoiner;
 @Component
 public class EffortExtractor<T extends FieldAccessor> implements Extractor<T, List<DoubleDatedData>> {
 
+    @Value("${multivalue.delimiter}")
+    protected String delimiter;
+
     @Override
     public Optional<String> extractAsString(T fieldAccessor, String fieldName) {
 
         Optional<List<DoubleDatedData>> extract = extract(fieldAccessor, fieldName, DatedData.NONE);
-        test(extract, DatedData.NONE, fieldName);
-        extract = extract(fieldAccessor, fieldName, DatedData.DAY);
-        test(extract, DatedData.DAY, fieldName);
-        extract = extract(fieldAccessor, fieldName, DatedData.MONTH);
-        test(extract, DatedData.MONTH, fieldName);
 
         if (extract.isPresent()) {
-            StringJoiner stringJoiner = new StringJoiner(",");
+            StringJoiner stringJoiner = new StringJoiner(delimiter);
             Iterator<DoubleDatedData> iterator = extract.get().iterator();
             while (iterator.hasNext()) {
                 DoubleDatedData next = iterator.next();
@@ -38,17 +37,6 @@ public class EffortExtractor<T extends FieldAccessor> implements Extractor<T, Li
         }
 
         return Optional.empty();
-    }
-
-    private void test(Optional<List<DoubleDatedData>> extract, int granularity, String fieldName) {
-        if (extract.isPresent()) {
-            Logger.info("Name : " + fieldName + "Granularity : " + granularity + " - SIZE : " + extract.get().size());
-            for (DoubleDatedData doubleDatedData : extract.get()) {
-                Logger.info("DATA : start=" + doubleDatedData.getStart() + " - finish=" + doubleDatedData.getFinish() + " - value=" + doubleDatedData.getData());
-            }
-        } else {
-
-        }
     }
 
     @Override

@@ -1,16 +1,26 @@
 package fr.sciforma.apietnic.business.processor;
 
 import com.sciforma.psnext.api.User;
-import fr.sciforma.apietnic.business.extractor.*;
+import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
+import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
+import fr.sciforma.apietnic.business.extractor.DateExtractor;
+import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.EffortExtractor;
+import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
+import fr.sciforma.apietnic.business.extractor.ListExtractor;
+import fr.sciforma.apietnic.business.extractor.StringExtractor;
 import fr.sciforma.apietnic.business.model.FieldType;
-import fr.sciforma.apietnic.business.model.SciformaField;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.StringJoiner;
 
 @Component
 public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
@@ -41,7 +51,7 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
     @Override
     public void process(SciformaService sciformaService) {
 
-        Logger.info("Processing file " + getFilename());
+        Logger.info("Processing file " + csvHelper.getFilename());
 
         Map<Double, String> userById = new HashMap<>();
 
@@ -49,29 +59,9 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
 
         for (User fieldAccessor : getFieldAccessors(sciformaService)) {
 
-            csvLine = new StringJoiner(csvDelimiter);
-
             Optional<Double> internalId = (Optional<Double>) extractorMap.get(FieldType.DECIMAL).extract(fieldAccessor, "Internal ID");
 
-            if (internalId.isPresent()) {
-
-                for (SciformaField sciformaField : getFieldsToExtract()) {
-
-                    Optional<String> value = extractorMap.get(sciformaField.getType()).extractAsString(fieldAccessor, sciformaField.getName());
-                    if (value.isPresent()) {
-                        csvLine.add(value.get());
-                    } else {
-                        csvLine.add("");
-                    }
-
-                }
-
-                userById.putIfAbsent(internalId.get(), csvLine.toString());
-
-            }
-
-            // TODO: remove this, for testing purpose
-            break;
+            internalId.ifPresent(aDouble -> userById.putIfAbsent(aDouble, buildCsvLine(fieldAccessor)));
 
         }
 
@@ -90,7 +80,9 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
 
         }
 
-        Logger.info("File " + getFilename() + " has been processed successfully");
+        csvHelper.flush();
+
+        Logger.info("File " + csvHelper.getFilename() + " has been processed successfully");
     }
 
     @Override

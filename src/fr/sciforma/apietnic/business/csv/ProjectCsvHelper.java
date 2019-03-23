@@ -11,7 +11,7 @@ public class ProjectCsvHelper extends AbstractCsvHelper<Project> {
     private String filename;
 
     @Override
-    protected String getFilename() {
+    public String getFilename() {
         return filename;
     }
 

@@ -1,5 +1,5 @@
 BATCH_PATH="/path/to/API/"
-BATCH_MAIN="APIEtnic.jar"
+BATCH_MAIN="APIEtnicExtract.jar"
 SCIFORMA_URL="http://www.psnext.etnic.be/sciforma"
 
 ROOT_DIR=$BATCH_PATH

@@ -11,7 +11,7 @@ public class TaskCsvHelper extends AbstractCsvHelper<Task> {
     private String filename;
 
     @Override
-    protected String getFilename() {
+    public String getFilename() {
         return filename;
     }
 

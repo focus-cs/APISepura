@@ -12,17 +12,13 @@ import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
 import fr.sciforma.apietnic.business.extractor.StringExtractor;
 import fr.sciforma.apietnic.business.model.FieldType;
-import fr.sciforma.apietnic.business.model.SciformaField;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.StringJoiner;
 
 @Component
 public class ProjectProcessor extends AbstractProcessor<Project> {
@@ -49,14 +45,12 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
     @Autowired
     private TaskProcessor taskProcessor;
-    @Autowired
-    private ResourceAssignementProcessor resourceAssignementProcessor;
 
     public void process(SciformaService sciformaService) {
 
-        List<Project> projectList = sciformaService.getProjects();
+        Logger.info("Processing file " + csvHelper.getFilename());
 
-        int testCpt = 0;
+        List<Project> projectList = sciformaService.getProjects();
 
         for (Project project : projectList) {
 
@@ -66,28 +60,9 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
                 Logger.info("Extracting data from project : " + extractorMap.get(FieldType.STRING).extractAsString(project, "Name"));
 
-                StringJoiner csvLine = new StringJoiner(csvDelimiter);
+                csvHelper.addLine(buildCsvLine(project));
 
-                for (SciformaField sciformaField : getFieldsToExtract()) {
-
-                    Optional<String> value = extractorMap.get(sciformaField.getType()).extractAsString(project, sciformaField.getName());
-                    if (value.isPresent()) {
-                        csvLine.add(value.get());
-                    } else {
-                        csvLine.add("");
-                    }
-
-                }
-
-                csvHelper.addLine(csvLine.toString());
-
-                taskProcessor.process(project.getTaskOutlineList());
-
-                //TODO: remove this (for testing purpose)
-                testCpt++;
-                if (testCpt > 0) {
-                    break;
-                }
+                taskProcessor.process(project);
 
             } catch (LockException e) {
                 Logger.error("Project is locked by " + e.getLockingUser());
@@ -104,6 +79,10 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
             }
 
         }
+
+        csvHelper.flush();
+
+        Logger.info("File " + csvHelper.getFilename() + " has been processed successfully");
 
     }
 

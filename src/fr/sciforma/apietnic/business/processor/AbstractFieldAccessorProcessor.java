@@ -1,43 +1,31 @@
 package fr.sciforma.apietnic.business.processor;
 
-import fr.sciforma.apietnic.business.model.SciformaField;
+import com.sciforma.psnext.api.FieldAccessor;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.StringJoiner;
 
 /**
  * Created on 12/03/19.
  */
-public abstract class AbstractFieldAccessorProcessor<T> extends AbstractProcessor<T> {
+public abstract class AbstractFieldAccessorProcessor<T extends FieldAccessor> extends AbstractProcessor<T> {
 
     protected abstract List<T> getFieldAccessors(SciformaService sciformaService);
 
     public void process(SciformaService sciformaService) {
-        Logger.info("Processing file ");
+
+        Logger.info("Processing file " + csvHelper.getFilename());
 
         for (T fieldAccessor : getFieldAccessors(sciformaService)) {
 
-            StringJoiner csvLine = new StringJoiner(csvDelimiter);
+            csvHelper.addLine(buildCsvLine(fieldAccessor));
 
-            for (SciformaField sciformaField : getFieldsToExtract()) {
-
-                Optional<String> value = extractorMap.get(sciformaField.getType()).extractAsString(fieldAccessor, sciformaField.getName());
-                if (value.isPresent()) {
-                    csvLine.add(value.get());
-                } else {
-                    csvLine.add("");
-                }
-
-            }
-
-            csvHelper.addLine(csvLine.toString());
         }
 
-        Logger.info("File " + getFilename() + " has been processed successfully");
+        csvHelper.flush();
+
+        Logger.info("File " + csvHelper.getFilename() + " has been processed successfully");
     }
 
 }

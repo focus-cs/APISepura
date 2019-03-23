@@ -11,7 +11,7 @@ public class JobClassificationCsvHelper extends AbstractCsvHelper<JobClassificat
     private String filename;
 
     @Override
-    protected String getFilename() {
+    public String getFilename() {
         return filename;
     }
 

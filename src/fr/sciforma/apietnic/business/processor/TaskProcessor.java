@@ -1,16 +1,27 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.*;
-import fr.sciforma.apietnic.business.extractor.*;
+import com.sciforma.psnext.api.PSException;
+import com.sciforma.psnext.api.Project;
+import com.sciforma.psnext.api.Task;
+import com.sciforma.psnext.api.TaskLink;
+import com.sciforma.psnext.api.TaskOutlineList;
+import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
+import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
+import fr.sciforma.apietnic.business.extractor.DateExtractor;
+import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.EffortExtractor;
+import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
+import fr.sciforma.apietnic.business.extractor.ListExtractor;
+import fr.sciforma.apietnic.business.extractor.StringExtractor;
 import fr.sciforma.apietnic.business.model.FieldType;
-import fr.sciforma.apietnic.business.model.SciformaField;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 public class TaskProcessor extends AbstractProcessor<Task> {
@@ -35,9 +46,17 @@ public class TaskProcessor extends AbstractProcessor<Task> {
     @Autowired
     private ResourceAssignementProcessor resourceAssignementProcessor;
 
-    protected void process(List<TaskOutlineList> tasks) {
+    protected void process(Project project) {
+
+        String projectName = null;
 
         try {
+
+            projectName = project.getStringField("Name");
+
+            Logger.info("Processing tasks for project " + projectName);
+
+            TaskOutlineList tasks = project.getTaskOutlineList();
 
             Iterator taskTterator = tasks.iterator();
             while (taskTterator.hasNext()) {
@@ -47,9 +66,12 @@ public class TaskProcessor extends AbstractProcessor<Task> {
                 parseTask(task.getPredecessorLinksList());
             }
 
+            Logger.info("Tasks for project " + projectName + " have been processed successfully");
 
         } catch (PSException e) {
-            Logger.error(e, "Failed to retrieve task outline for project");
+            Logger.error(e, "Failed to retrieve task outline for project " + projectName);
+        } finally {
+            csvHelper.flush();
         }
 
     }
@@ -65,30 +87,10 @@ public class TaskProcessor extends AbstractProcessor<Task> {
             try {
                 task = taskLink.getTask();
 
-                StringJoiner csvLine = new StringJoiner(csvDelimiter);
+                Optional<Date> taskStart = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(task, "Start");
+                Optional<Date> taskFinish = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(task, "Finish");
 
-                Optional<Date> taskStart = Optional.empty();
-                Optional<Date> taskFinish = Optional.empty();
-
-                for (SciformaField sciformaField : getFieldsToExtract()) {
-
-                    Optional<String> value = extractorMap.get(sciformaField.getType()).extractAsString(task, sciformaField.getName());
-                    if (value.isPresent()) {
-                        csvLine.add(value.get());
-                    } else {
-                        csvLine.add("");
-                    }
-
-                    if ("Start".equals(sciformaField.getName())) {
-                        taskStart = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(task, sciformaField.getName());
-                    }
-
-                    if ("Finish".equals(sciformaField.getName())) {
-                        taskFinish = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(task, sciformaField.getName());
-                    }
-                }
-
-                csvHelper.addLine(csvLine.toString());
+                csvHelper.addLine(buildCsvLine(task));
 
                 if (taskStart.isPresent() && taskFinish.isPresent()) {
                     resourceAssignementProcessor.process(task, taskStart.get(), taskFinish.get());

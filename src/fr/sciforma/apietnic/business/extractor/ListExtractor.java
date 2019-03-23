@@ -3,6 +3,7 @@ package fr.sciforma.apietnic.business.extractor;
 import com.sciforma.psnext.api.FieldAccessor;
 import com.sciforma.psnext.api.PSException;
 import org.pmw.tinylog.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -12,13 +13,16 @@ import java.util.StringJoiner;
 @Component
 public class ListExtractor<T extends FieldAccessor> implements Extractor<T, List> {
 
+    @Value("${multivalue.delimiter}")
+    protected String delimiter;
+
     @Override
     public Optional<String> extractAsString(T fieldAccessor, String fieldName) {
 
         try {
             List listField = fieldAccessor.getListField(fieldName);
 
-            StringJoiner joinedValue = new StringJoiner(",");
+            StringJoiner joinedValue = new StringJoiner(delimiter);
             for (Object o : listField) {
                 if (o instanceof String) {
                     joinedValue.add((String) o);
