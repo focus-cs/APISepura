@@ -19,5 +19,6 @@ JAVA_ARGS="-showversion"
 JAVA_ARGS="$JAVA_ARGS -Xms1024m"
 JAVA_ARGS="$JAVA_ARGS -Xmx2048m"
 JAVA_ARGS="$JAVA_ARGS -jar"
+JAVA_ARGS="$JAVA_ARGS -Dtinylog.configuration=config/tinylog.properties"
 
 java $JAVA_ARGS $BATCH_MAIN
