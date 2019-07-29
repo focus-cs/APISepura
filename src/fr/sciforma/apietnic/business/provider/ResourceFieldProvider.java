@@ -19,7 +19,6 @@ public class ResourceFieldProvider implements FieldProvider<Resource> {
     @PostConstruct
     public void init() {
         fields = new ArrayList<>();
-//        fields.add(SciformaField.builder().name("Calendar").type(FieldType.CALENDAR).build());
         fields.add(SciformaField.builder().name("Compétence directe").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Compétences directes").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Internal ID").type(FieldType.DECIMAL).build());

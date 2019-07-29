@@ -34,6 +34,9 @@ import java.util.StringJoiner;
 
 public abstract class AbstractProcessor<T extends FieldAccessor> {
 
+    private static final String START_HEADER = "**Start**";
+    private static final String FINISH_HEADER = "**Finish**";
+
     private SimpleDateFormat sdf;
 
     @Value("${csv.delimiter}")
@@ -100,8 +103,8 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
 
                 if (!datedData.isEmpty()) {
 
-                    header.put(CsvHelper.START_HEADER, sdf.format(datedData.get(0).getStart()));
-                    header.put(CsvHelper.FINISH_HEADER, sdf.format(datedData.get(0).getFinish()));
+                    header.put(START_HEADER, sdf.format(datedData.get(0).getStart()));
+                    header.put(FINISH_HEADER, sdf.format(datedData.get(0).getFinish()));
                     header.put(sciformaField.getName(), String.valueOf(datedData.get(0).getData()));
 
                 }
@@ -113,7 +116,7 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
             }
         }
 
-        if (header.get(CsvHelper.START_HEADER) != null && !header.get(CsvHelper.START_HEADER).isEmpty()) {
+        if (header.get(START_HEADER) != null && !header.get(START_HEADER).isEmpty()) {
 
             StringJoiner csvLine = new StringJoiner(csvDelimiter);
 

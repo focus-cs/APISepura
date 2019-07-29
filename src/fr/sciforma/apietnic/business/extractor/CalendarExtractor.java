@@ -29,7 +29,7 @@ public class CalendarExtractor<T extends FieldAccessor> implements Extractor<T, 
 
     @Override
     public Optional<Calendar> extract(T fieldAccessor, String fieldName) {
-        return null;
+        return Optional.empty();
     }
 
 

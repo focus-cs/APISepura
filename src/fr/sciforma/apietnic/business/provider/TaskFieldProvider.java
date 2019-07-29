@@ -97,7 +97,6 @@ public class TaskFieldProvider implements FieldProvider<Task> {
         fields.add(SciformaField.builder().name("Manager 3").type(FieldType.USER).build());
         fields.add(SciformaField.builder().name("Name").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Performance").type(FieldType.DECIMAL).build());
-//        fields.add(SciformaField.builder().name("Predecessor #s").type(FieldType.null).build());
         fields.add(SciformaField.builder().name("Ratio avancement").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("Required Date").type(FieldType.DATE).build());
         fields.add(SciformaField.builder().name("Required Labor").type(FieldType.DECIMAL).build());
@@ -106,7 +105,6 @@ public class TaskFieldProvider implements FieldProvider<Task> {
         fields.add(SciformaField.builder().name("Ratio budget").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("Start").type(FieldType.DATE).build());
         fields.add(SciformaField.builder().name("Start Delay").type(FieldType.DURATION).build());
-//        fields.add(SciformaField.builder().name("Successor #s").type(FieldType.null).build());
         fields.add(SciformaField.builder().name("Total Float").type(FieldType.DURATION).build());
         fields.add(SciformaField.builder().name("E_TypeActivite").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Unités produites").type(FieldType.EFFORT).build());
