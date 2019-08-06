@@ -85,7 +85,7 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
         return csvLine.toString();
     }
 
-    Optional<String> buildTimeDistributedCsvLine(T assignment, LocalDate localDate) throws PSException {
+    Optional<String> buildTimeDistributedCsvLine(T distributedValue, LocalDate localDate) throws PSException {
         Map<String, String> header = new HashMap<>();
 
         for (String headerItem : csvHelper.getHeaderAsList()) {
@@ -99,7 +99,7 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
                 Date from = Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
                 Date to = Date.from(localDate.plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 
-                List<DoubleDatedData> datedData = assignment.getDatedData(sciformaField.getName(), DatedData.DAY, from, to);
+                List<DoubleDatedData> datedData = distributedValue.getDatedData(sciformaField.getName(), DatedData.DAY, from, to);
 
                 if (!datedData.isEmpty()) {
 
@@ -111,7 +111,7 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
 
             } else {
 
-                extractorMap.get(sciformaField.getType()).extractAsString(assignment, sciformaField.getName()).ifPresent(fieldValue -> header.put(sciformaField.getName(), fieldValue));
+                extractorMap.get(sciformaField.getType()).extractAsString(distributedValue, sciformaField.getName()).ifPresent(fieldValue -> header.put(sciformaField.getName(), fieldValue));
 
             }
         }
