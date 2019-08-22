@@ -34,10 +34,10 @@ import java.util.StringJoiner;
 
 public abstract class AbstractProcessor<T extends FieldAccessor> {
 
-    private static final String START_HEADER = "**Start**";
-    private static final String FINISH_HEADER = "**Finish**";
+    protected static final String START_HEADER = "**Start**";
+    protected static final String FINISH_HEADER = "**Finish**";
 
-    private SimpleDateFormat sdf;
+    protected SimpleDateFormat sdf;
 
     @Value("${csv.delimiter}")
     protected String csvDelimiter;

@@ -15,5 +15,7 @@ public enum FieldType {
     URL,
     CALENDAR,
     EFFORT_RATE,
-    LIST
+    LIST,
+    STRING_DATED,
+    DOUBLE_DATED
 }

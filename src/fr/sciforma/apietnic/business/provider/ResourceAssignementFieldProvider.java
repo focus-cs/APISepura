@@ -65,7 +65,7 @@ public class ResourceAssignementFieldProvider implements FieldProvider<ResAssign
         fields.add(SciformaField.builder().name("Duration").type(FieldType.DURATION).build());
         fields.add(SciformaField.builder().name("Effort % Complete").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("ID").type(FieldType.STRING).build());
-        fields.add(SciformaField.builder().name("Internal ID").type(FieldType.INTEGER).build());
+        fields.add(SciformaField.builder().name("Internal ID").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("Job Classification").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Name").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Physical % Complete").type(FieldType.DECIMAL).build());
