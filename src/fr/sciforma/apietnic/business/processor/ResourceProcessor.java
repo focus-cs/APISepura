@@ -48,17 +48,24 @@ public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> 
     @Autowired
     private TimesheetProcessor timesheetProcessor;
 
-    public Map<Double, String> getResourcesById(SciformaService sciformaService) {
+    public Map<Double, Resource> getResourcesById(SciformaService sciformaService) {
 
-        Map<Double, String> resourcesById = new HashMap<>();
+        Map<Double, Resource> resourcesById = new HashMap<>();
+
+        int cpt = 0;
 
         for (Resource fieldAccessor : getFieldAccessors(sciformaService)) {
 
             Optional<Double> internalId = (Optional<Double>) extractorMap.get(FieldType.DECIMAL).extract(fieldAccessor, "Internal ID");
 
-            internalId.ifPresent(aDouble -> resourcesById.putIfAbsent(aDouble, buildCsvLine(fieldAccessor)));
+            internalId.ifPresent(aDouble -> resourcesById.putIfAbsent(aDouble, fieldAccessor));
 
             timesheetProcessor.process(sciformaService, fieldAccessor);
+
+            cpt++;
+            if (cpt > 5) {
+                break;
+            }
 
         }
 
