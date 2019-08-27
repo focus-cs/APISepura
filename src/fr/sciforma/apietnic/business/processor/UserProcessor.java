@@ -5,9 +5,11 @@ import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
 import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
+import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.StringExtractor;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.service.SciformaService;
@@ -44,6 +46,10 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
     private CalendarExtractor<User> calendarExtractor;
     @Autowired
     private EffortExtractor<User> effortExtractor;
+    @Autowired
+    private DoubleDatedExtractor<User> doubleDatedExtractor;
+    @Autowired
+    private StringDatedExtractor<User> stringDatedExtractor;
 
     @Autowired
     ResourceProcessor resourceProcessor;
@@ -128,6 +134,16 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
     @Override
     public EffortExtractor<User> getEffortExtractor() {
         return effortExtractor;
+    }
+
+    @Override
+    public DoubleDatedExtractor<User> getDoubleDatedExtractor() {
+        return doubleDatedExtractor;
+    }
+
+    @Override
+    public StringDatedExtractor<User> getStringDatedExtractor() {
+        return stringDatedExtractor;
     }
 
 }

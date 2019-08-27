@@ -2,14 +2,17 @@ package fr.sciforma.apietnic.business.processor;
 
 import com.sciforma.psnext.api.LockException;
 import com.sciforma.psnext.api.PSException;
+import com.sciforma.psnext.api.PortfolioFolder;
 import com.sciforma.psnext.api.Project;
 import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
 import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
+import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.StringExtractor;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.service.SciformaService;
@@ -42,6 +45,10 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
     private CalendarExtractor<Project> calendarExtractor;
     @Autowired
     private EffortExtractor<Project> effortExtractor;
+    @Autowired
+    private DoubleDatedExtractor<Project> doubleDatedExtractor;
+    @Autowired
+    private StringDatedExtractor<Project> stringDatedExtractor;
 
     @Autowired
     private TaskProcessor taskProcessor;
@@ -124,5 +131,15 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
     @Override
     public EffortExtractor<Project> getEffortExtractor() {
         return effortExtractor;
+    }
+
+    @Override
+    public DoubleDatedExtractor<Project> getDoubleDatedExtractor() {
+        return doubleDatedExtractor;
+    }
+
+    @Override
+    public StringDatedExtractor<Project> getStringDatedExtractor() {
+        return stringDatedExtractor;
     }
 }

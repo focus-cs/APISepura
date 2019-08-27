@@ -4,16 +4,20 @@ import com.sciforma.psnext.api.DatedData;
 import com.sciforma.psnext.api.DoubleDatedData;
 import com.sciforma.psnext.api.PSException;
 import com.sciforma.psnext.api.Resource;
+import com.sciforma.psnext.api.StringDatedData;
 import com.sciforma.psnext.api.Timesheet;
 import com.sciforma.psnext.api.TimesheetAssignment;
 import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
 import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
+import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.StringExtractor;
+import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
@@ -32,6 +36,7 @@ import java.util.StringJoiner;
 @Component
 public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
 
+    public static final String ACTUAL_EFFORT = "Actual Effort";
     @Autowired
     private StringExtractor<TimesheetAssignment> stringExtractor;
     @Autowired
@@ -48,6 +53,10 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
     private CalendarExtractor<TimesheetAssignment> calendarExtractor;
     @Autowired
     private EffortExtractor<TimesheetAssignment> effortExtractor;
+    @Autowired
+    private DoubleDatedExtractor<TimesheetAssignment> doubleDatedExtractor;
+    @Autowired
+    private StringDatedExtractor<TimesheetAssignment> stringDatedExtractor;
 
     protected void process(SciformaService sciformaService, Resource resource) {
 
@@ -112,8 +121,7 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
 
         for (SciformaField sciformaField : getFieldsToExtract()) {
 
-//            if (sciformaField.getType().equals(FieldType.EFFORT)) {
-            if (sciformaField.getName().equals("Actual Effort")) {
+            if (sciformaField.getType().equals(FieldType.EFFORT)) {
 
                 Date from = Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
                 Date to = Date.from(localDate.plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
@@ -122,8 +130,23 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
 
                 if (!datedData.isEmpty()) {
 
-                    header.put(START_HEADER, sdf.format(datedData.get(0).getStart()));
-                    header.put(FINISH_HEADER, sdf.format(datedData.get(0).getFinish()));
+                    header.putIfAbsent(START_HEADER, sdf.format(datedData.get(0).getStart()));
+                    header.putIfAbsent(FINISH_HEADER, sdf.format(datedData.get(0).getFinish()));
+                    header.put(sciformaField.getName(), String.valueOf(datedData.get(0).getData()));
+
+                }
+
+            } else if (sciformaField.getType().equals(FieldType.STRING_DATED)) {
+
+                Date from = Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+                Date to = Date.from(localDate.plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+
+                List<StringDatedData> datedData = distributedValue.getDatedData(sciformaField.getName(), DatedData.DAY, from, to);
+
+                if (!datedData.isEmpty()) {
+
+                    header.putIfAbsent(START_HEADER, sdf.format(datedData.get(0).getStart()));
+                    header.putIfAbsent(FINISH_HEADER, sdf.format(datedData.get(0).getFinish()));
                     header.put(sciformaField.getName(), String.valueOf(datedData.get(0).getData()));
 
                 }
@@ -135,25 +158,31 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
             }
         }
 
-        if (header.get(START_HEADER) != null && !header.get(START_HEADER).isEmpty()) {
+        if (header.containsKey(ACTUAL_EFFORT) && header.get(ACTUAL_EFFORT) != null && Double.valueOf(header.get(ACTUAL_EFFORT)) > 0) {
 
-            StringJoiner csvLine = new StringJoiner(csvDelimiter);
+            if (header.get(START_HEADER) != null && !header.get(START_HEADER).isEmpty()) {
 
-            for (String headerItem : csvHelper.getHeaderAsList()) {
+                StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
-                if (header.containsKey(headerItem)) {
+                for (String headerItem : csvHelper.getHeaderAsList()) {
 
-                    if (header.get(headerItem) != null) {
-                        csvLine.add(header.get(headerItem));
-                    } else {
-                        csvLine.add("");
+                    if (header.containsKey(headerItem)) {
+
+                        if (header.get(headerItem) != null) {
+                            csvLine.add(header.get(headerItem));
+                        } else {
+                            csvLine.add("");
+                        }
+
                     }
 
                 }
 
-            }
+                return Optional.of(csvLine.toString());
 
-            return Optional.of(csvLine.toString());
+            } else {
+                return Optional.empty();
+            }
 
         } else {
             return Optional.empty();
@@ -199,6 +228,16 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
     @Override
     public EffortExtractor<TimesheetAssignment> getEffortExtractor() {
         return effortExtractor;
+    }
+
+    @Override
+    public DoubleDatedExtractor<TimesheetAssignment> getDoubleDatedExtractor() {
+        return doubleDatedExtractor;
+    }
+
+    @Override
+    public StringDatedExtractor<TimesheetAssignment> getStringDatedExtractor() {
+        return stringDatedExtractor;
     }
 
 }

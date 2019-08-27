@@ -1,15 +1,19 @@
 package fr.sciforma.apietnic.business.processor;
 
+import com.sciforma.psnext.api.JobClassification;
 import com.sciforma.psnext.api.PSException;
+import com.sciforma.psnext.api.Project;
 import com.sciforma.psnext.api.ResAssignment;
 import com.sciforma.psnext.api.Task;
 import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
 import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
+import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.StringExtractor;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +43,10 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
     private CalendarExtractor<ResAssignment> calendarExtractor;
     @Autowired
     private EffortExtractor<ResAssignment> effortExtractor;
+    @Autowired
+    private DoubleDatedExtractor<ResAssignment> doubleDatedExtractor;
+    @Autowired
+    private StringDatedExtractor<ResAssignment> stringDatedExtractor;
 
     protected void process(Task task, Date start, Date end) {
 
@@ -115,5 +123,15 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
     @Override
     public EffortExtractor<ResAssignment> getEffortExtractor() {
         return effortExtractor;
+    }
+
+    @Override
+    public DoubleDatedExtractor<ResAssignment> getDoubleDatedExtractor() {
+        return doubleDatedExtractor;
+    }
+
+    @Override
+    public StringDatedExtractor<ResAssignment> getStringDatedExtractor() {
+        return stringDatedExtractor;
     }
 }

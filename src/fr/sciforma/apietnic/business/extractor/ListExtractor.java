@@ -22,9 +22,12 @@ public class ListExtractor<T extends FieldAccessor> implements Extractor<T, List
         try {
             List listField = fieldAccessor.getListField(fieldName);
 
+            System.out.println("FIELD : " + fieldName + " contains " + listField.size() + " values");
+
             StringJoiner joinedValue = new StringJoiner(delimiter);
             for (Object o : listField) {
                 if (o instanceof String) {
+                    System.out.println(o);
                     joinedValue.add((String) o);
                 }
             }

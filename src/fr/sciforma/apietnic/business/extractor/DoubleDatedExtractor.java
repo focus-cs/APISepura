@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 @Component
-public class EffortExtractor<T extends FieldAccessor> implements Extractor<T, List<DoubleDatedData>> {
+public class DoubleDatedExtractor<T extends FieldAccessor> implements Extractor<T, List<DoubleDatedData>> {
 
     @Value("${multivalue.delimiter}")
     protected String delimiter;

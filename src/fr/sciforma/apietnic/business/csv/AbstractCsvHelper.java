@@ -17,6 +17,9 @@ import java.util.StringJoiner;
 
 public abstract class AbstractCsvHelper<T> implements CsvHelper<T> {
 
+    String START_HEADER = "**Start**";
+    String FINISH_HEADER = "**Finish**";
+
     private static final int BATCH_SIZE = 200;
 
     @Value("${csv.delimiter}")

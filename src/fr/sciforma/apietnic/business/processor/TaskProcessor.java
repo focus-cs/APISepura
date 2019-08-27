@@ -2,6 +2,7 @@ package fr.sciforma.apietnic.business.processor;
 
 import com.sciforma.psnext.api.PSException;
 import com.sciforma.psnext.api.Project;
+import com.sciforma.psnext.api.Skill;
 import com.sciforma.psnext.api.Task;
 import com.sciforma.psnext.api.TaskLink;
 import com.sciforma.psnext.api.TaskOutlineList;
@@ -9,9 +10,11 @@ import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
 import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
+import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.StringExtractor;
 import fr.sciforma.apietnic.business.model.FieldType;
 import org.pmw.tinylog.Logger;
@@ -42,6 +45,10 @@ public class TaskProcessor extends AbstractProcessor<Task> {
     private CalendarExtractor<Task> calendarExtractor;
     @Autowired
     private EffortExtractor<Task> effortExtractor;
+    @Autowired
+    private DoubleDatedExtractor<Task> doubleDatedExtractor;
+    @Autowired
+    private StringDatedExtractor<Task> stringDatedExtractor;
 
     @Autowired
     private ResourceAssignementProcessor resourceAssignementProcessor;
@@ -142,5 +149,15 @@ public class TaskProcessor extends AbstractProcessor<Task> {
     @Override
     public EffortExtractor<Task> getEffortExtractor() {
         return effortExtractor;
+    }
+
+    @Override
+    public DoubleDatedExtractor<Task> getDoubleDatedExtractor() {
+        return doubleDatedExtractor;
+    }
+
+    @Override
+    public StringDatedExtractor<Task> getStringDatedExtractor() {
+        return stringDatedExtractor;
     }
 }

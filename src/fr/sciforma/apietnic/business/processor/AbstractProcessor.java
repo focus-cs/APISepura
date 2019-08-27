@@ -9,10 +9,12 @@ import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
 import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
 import fr.sciforma.apietnic.business.extractor.Extractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
+import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.StringExtractor;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
@@ -65,6 +67,8 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
         extractorMap.putIfAbsent(FieldType.CALENDAR, getStringExtractor());
         extractorMap.putIfAbsent(FieldType.EFFORT_RATE, getStringExtractor());
         extractorMap.putIfAbsent(FieldType.LIST, getListExtractor());
+        extractorMap.putIfAbsent(FieldType.DOUBLE_DATED, getDoubleDatedExtractor());
+        extractorMap.putIfAbsent(FieldType.STRING_DATED, getStringDatedExtractor());
 
         sdf = new SimpleDateFormat("dd/MM/yyyy");
     }
@@ -161,5 +165,9 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
     public abstract CalendarExtractor<T> getCalendarExtractor();
 
     public abstract EffortExtractor<T> getEffortExtractor();
+
+    public abstract DoubleDatedExtractor<T> getDoubleDatedExtractor();
+
+    public abstract StringDatedExtractor<T> getStringDatedExtractor();
 
 }

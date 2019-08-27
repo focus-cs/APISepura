@@ -1,13 +1,16 @@
 package fr.sciforma.apietnic.business.processor;
 
+import com.sciforma.psnext.api.JobClassification;
 import com.sciforma.psnext.api.Organization;
 import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
 import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
+import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.StringExtractor;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +38,10 @@ public class OrganizationProcessor extends AbstractSystemDataProcessor<Organizat
     private CalendarExtractor<Organization> calendarExtractor;
     @Autowired
     private EffortExtractor<Organization> effortExtractor;
+    @Autowired
+    private DoubleDatedExtractor<Organization> doubleDatedExtractor;
+    @Autowired
+    private StringDatedExtractor<Organization> stringDatedExtractor;
 
     @Override
     protected Optional<Organization> getFieldAccessors(SciformaService sciformaService) {
@@ -84,5 +91,15 @@ public class OrganizationProcessor extends AbstractSystemDataProcessor<Organizat
     @Override
     public EffortExtractor<Organization> getEffortExtractor() {
         return effortExtractor;
+    }
+
+    @Override
+    public DoubleDatedExtractor<Organization> getDoubleDatedExtractor() {
+        return doubleDatedExtractor;
+    }
+
+    @Override
+    public StringDatedExtractor<Organization> getStringDatedExtractor() {
+        return stringDatedExtractor;
     }
 }

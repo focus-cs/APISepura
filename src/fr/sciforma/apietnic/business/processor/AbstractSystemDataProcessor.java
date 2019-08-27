@@ -19,9 +19,9 @@ public abstract class AbstractSystemDataProcessor<T extends FieldAccessor> exten
 
         Logger.info("Processing file " + csvHelper.getFilename());
 
-        Optional<T> skills = getFieldAccessors(sciformaService);
+        Optional<T> fieldAccessors = getFieldAccessors(sciformaService);
 
-        skills.ifPresent(this::parse);
+        fieldAccessors.ifPresent(this::parse);
 
         csvHelper.flush();
 
