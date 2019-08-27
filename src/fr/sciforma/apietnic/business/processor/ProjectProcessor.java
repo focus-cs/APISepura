@@ -2,7 +2,6 @@ package fr.sciforma.apietnic.business.processor;
 
 import com.sciforma.psnext.api.LockException;
 import com.sciforma.psnext.api.PSException;
-import com.sciforma.psnext.api.PortfolioFolder;
 import com.sciforma.psnext.api.Project;
 import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
@@ -10,6 +9,7 @@ import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
 import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
+import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
 import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
@@ -49,6 +49,8 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
     private DoubleDatedExtractor<Project> doubleDatedExtractor;
     @Autowired
     private StringDatedExtractor<Project> stringDatedExtractor;
+    @Autowired
+    private HierarchicalExtractor<Project> hierarchicalExtractor;
 
     @Autowired
     private TaskProcessor taskProcessor;
@@ -141,5 +143,10 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
     @Override
     public StringDatedExtractor<Project> getStringDatedExtractor() {
         return stringDatedExtractor;
+    }
+
+    @Override
+    public HierarchicalExtractor<Project> getHierarchicalExtractor() {
+        return hierarchicalExtractor;
     }
 }

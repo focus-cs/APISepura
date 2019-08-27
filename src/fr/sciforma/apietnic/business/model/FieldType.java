@@ -17,5 +17,6 @@ public enum FieldType {
     EFFORT_RATE,
     LIST,
     STRING_DATED,
-    DOUBLE_DATED
+    DOUBLE_DATED,
+    HIERARCHICAL
 }

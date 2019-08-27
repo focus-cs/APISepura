@@ -24,7 +24,7 @@ public class OrganizationFieldProvider implements FieldProvider<Organization> {
         fields.add(SciformaField.builder().name("Manager 1").type(FieldType.USER).build());
         fields.add(SciformaField.builder().name("Manager 2").type(FieldType.USER).build());
         fields.add(SciformaField.builder().name("Manager 3").type(FieldType.USER).build());
-        fields.add(SciformaField.builder().name("Name").type(FieldType.STRING).build());
+        fields.add(SciformaField.builder().name("Name").type(FieldType.HIERARCHICAL).build());
         fields.add(SciformaField.builder().name("Organization Code").type(FieldType.STRING).build());
     }
 }

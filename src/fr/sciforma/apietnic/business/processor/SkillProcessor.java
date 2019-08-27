@@ -8,6 +8,7 @@ import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
 import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
+import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
 import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
@@ -45,6 +46,8 @@ public class SkillProcessor extends AbstractSystemDataProcessor<Skill> {
     private DoubleDatedExtractor<Skill> doubleDatedExtractor;
     @Autowired
     private StringDatedExtractor<Skill> stringDatedExtractor;
+    @Autowired
+    private HierarchicalExtractor<Skill> hierarchicalExtractor;
 
     private Map<String, Skill> skillsByName;
 
@@ -146,6 +149,11 @@ public class SkillProcessor extends AbstractSystemDataProcessor<Skill> {
     @Override
     public StringDatedExtractor<Skill> getStringDatedExtractor() {
         return stringDatedExtractor;
+    }
+
+    @Override
+    public HierarchicalExtractor<Skill> getHierarchicalExtractor() {
+        return hierarchicalExtractor;
     }
 
 }

@@ -8,6 +8,7 @@ import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
 import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
+import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
 import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
@@ -42,6 +43,8 @@ public class OrganizationProcessor extends AbstractSystemDataProcessor<Organizat
     private DoubleDatedExtractor<Organization> doubleDatedExtractor;
     @Autowired
     private StringDatedExtractor<Organization> stringDatedExtractor;
+    @Autowired
+    private HierarchicalExtractor<Organization> hierarchicalExtractor;
 
     @Override
     protected Optional<Organization> getFieldAccessors(SciformaService sciformaService) {
@@ -101,5 +104,10 @@ public class OrganizationProcessor extends AbstractSystemDataProcessor<Organizat
     @Override
     public StringDatedExtractor<Organization> getStringDatedExtractor() {
         return stringDatedExtractor;
+    }
+
+    @Override
+    public HierarchicalExtractor<Organization> getHierarchicalExtractor() {
+        return hierarchicalExtractor;
     }
 }

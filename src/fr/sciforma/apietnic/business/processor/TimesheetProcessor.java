@@ -13,6 +13,7 @@ import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
 import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
+import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
 import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
@@ -57,6 +58,8 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
     private DoubleDatedExtractor<TimesheetAssignment> doubleDatedExtractor;
     @Autowired
     private StringDatedExtractor<TimesheetAssignment> stringDatedExtractor;
+    @Autowired
+    private HierarchicalExtractor<TimesheetAssignment> hierarchicalExtractor;
 
     protected void process(SciformaService sciformaService, Resource resource) {
 
@@ -238,6 +241,11 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
     @Override
     public StringDatedExtractor<TimesheetAssignment> getStringDatedExtractor() {
         return stringDatedExtractor;
+    }
+
+    @Override
+    public HierarchicalExtractor<TimesheetAssignment> getHierarchicalExtractor() {
+        return hierarchicalExtractor;
     }
 
 }

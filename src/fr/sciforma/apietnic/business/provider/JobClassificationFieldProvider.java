@@ -21,6 +21,6 @@ public class JobClassificationFieldProvider implements FieldProvider<JobClassifi
         fields = new ArrayList<>();
         fields.add(SciformaField.builder().name("Description").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Internal ID").type(FieldType.DECIMAL).build());
-        fields.add(SciformaField.builder().name("Name").type(FieldType.STRING).build());
+        fields.add(SciformaField.builder().name("Name").type(FieldType.HIERARCHICAL).build());
     }
 }

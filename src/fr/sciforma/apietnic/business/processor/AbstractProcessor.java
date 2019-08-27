@@ -12,6 +12,7 @@ import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
 import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
 import fr.sciforma.apietnic.business.extractor.Extractor;
+import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
 import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
@@ -69,6 +70,7 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
         extractorMap.putIfAbsent(FieldType.LIST, getListExtractor());
         extractorMap.putIfAbsent(FieldType.DOUBLE_DATED, getDoubleDatedExtractor());
         extractorMap.putIfAbsent(FieldType.STRING_DATED, getStringDatedExtractor());
+        extractorMap.putIfAbsent(FieldType.HIERARCHICAL, getHierarchicalExtractor());
 
         sdf = new SimpleDateFormat("dd/MM/yyyy");
     }
@@ -169,5 +171,7 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
     public abstract DoubleDatedExtractor<T> getDoubleDatedExtractor();
 
     public abstract StringDatedExtractor<T> getStringDatedExtractor();
+
+    public abstract HierarchicalExtractor<T> getHierarchicalExtractor();
 
 }

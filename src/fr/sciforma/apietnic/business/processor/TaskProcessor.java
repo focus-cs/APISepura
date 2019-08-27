@@ -2,7 +2,6 @@ package fr.sciforma.apietnic.business.processor;
 
 import com.sciforma.psnext.api.PSException;
 import com.sciforma.psnext.api.Project;
-import com.sciforma.psnext.api.Skill;
 import com.sciforma.psnext.api.Task;
 import com.sciforma.psnext.api.TaskLink;
 import com.sciforma.psnext.api.TaskOutlineList;
@@ -12,6 +11,7 @@ import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
 import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
+import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
 import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
@@ -49,6 +49,8 @@ public class TaskProcessor extends AbstractProcessor<Task> {
     private DoubleDatedExtractor<Task> doubleDatedExtractor;
     @Autowired
     private StringDatedExtractor<Task> stringDatedExtractor;
+    @Autowired
+    private HierarchicalExtractor<Task> hierarchicalExtractor;
 
     @Autowired
     private ResourceAssignementProcessor resourceAssignementProcessor;
@@ -159,5 +161,10 @@ public class TaskProcessor extends AbstractProcessor<Task> {
     @Override
     public StringDatedExtractor<Task> getStringDatedExtractor() {
         return stringDatedExtractor;
+    }
+
+    @Override
+    public HierarchicalExtractor<Task> getHierarchicalExtractor() {
+        return hierarchicalExtractor;
     }
 }

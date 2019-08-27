@@ -7,6 +7,7 @@ import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
 import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
+import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
 import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
@@ -41,6 +42,8 @@ public class JobClassificationProcessor extends AbstractSystemDataProcessor<JobC
     private DoubleDatedExtractor<JobClassification> doubleDatedExtractor;
     @Autowired
     private StringDatedExtractor<JobClassification> stringDatedExtractor;
+    @Autowired
+    private HierarchicalExtractor<JobClassification> hierarchicalExtractor;
 
     @Override
     protected Optional<JobClassification> getFieldAccessors(SciformaService sciformaService) {
@@ -100,5 +103,10 @@ public class JobClassificationProcessor extends AbstractSystemDataProcessor<JobC
     @Override
     public StringDatedExtractor<JobClassification> getStringDatedExtractor() {
         return stringDatedExtractor;
+    }
+
+    @Override
+    public HierarchicalExtractor<JobClassification> getHierarchicalExtractor() {
+        return hierarchicalExtractor;
     }
 }

@@ -11,6 +11,7 @@ import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
 import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
+import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
 import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
@@ -54,6 +55,8 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
     private DoubleDatedExtractor<User> doubleDatedExtractor;
     @Autowired
     private StringDatedExtractor<User> stringDatedExtractor;
+    @Autowired
+    private HierarchicalExtractor<User> hierarchicalExtractor;
 
     @Autowired
     ResourceProcessor resourceProcessor;
@@ -80,10 +83,10 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
 
             internalId.ifPresent(aDouble -> userById.putIfAbsent(aDouble, fieldAccessor));
 
-            cpt++;
-            if (cpt > 5) {
-                break;
-            }
+//            cpt++;
+//            if (cpt > 5) {
+//                break;
+//            }
 
         }
 
@@ -128,7 +131,7 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
                                 csvLine.add(String.valueOf(userEntry.getValue().getDoubleField("Internal ID")));
                                 csvLine.add(userEntry.getValue().getStringField("Name"));
                                 csvLine.add(String.valueOf(skillsByName.get(userSkill).getDoubleField("Internal ID")));
-                                csvLine.add(skillsByName.get(userSkill).getStringField("Name"));
+                                csvLine.add(skillsByName.get(userSkill).toString());
 
                                 skillUSerCsvHelper.addLine(csvLine.toString());
                             }
@@ -203,6 +206,11 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
     @Override
     public StringDatedExtractor<User> getStringDatedExtractor() {
         return stringDatedExtractor;
+    }
+
+    @Override
+    public HierarchicalExtractor<User> getHierarchicalExtractor() {
+        return hierarchicalExtractor;
     }
 
 }

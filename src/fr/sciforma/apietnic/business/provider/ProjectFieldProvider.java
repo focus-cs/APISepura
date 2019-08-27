@@ -84,7 +84,7 @@ public class ProjectFieldProvider implements FieldProvider<Project> {
         fields.add(SciformaField.builder().name("Start Constraint").type(FieldType.DATE).build());
         fields.add(SciformaField.builder().name("Total Labor Effort").type(FieldType.EFFORT).build());
         fields.add(SciformaField.builder().name("Version").type(FieldType.STRING).build());
-        fields.add(SciformaField.builder().name("Version ID").type(FieldType.DECIMAL).build());
+        fields.add(SciformaField.builder().name("Version ID").type(FieldType.INTEGER).build());
         fields.add(SciformaField.builder().name("Y_Analyste_Backup_nom").type(FieldType.RESOURCE).build());
         fields.add(SciformaField.builder().name("Y_CatégorieAnalytique_projet").type(FieldType.INTEGER).build());
         fields.add(SciformaField.builder().name("Y_CodeAnalytique_projet").type(FieldType.STRING).build());
@@ -111,7 +111,7 @@ public class ProjectFieldProvider implements FieldProvider<Project> {
         fields.add(SciformaField.builder().name("Y_MElissage").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Y_Nature demande ou projet").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Y_Objectif fin").type(FieldType.DATE).build());
-        fields.add(SciformaField.builder().name("Y_ProgrammeListe_projet").type(FieldType.STRING).build());
+        fields.add(SciformaField.builder().name("Y_ProgrammeListe_projet").type(FieldType.LIST).build());
     }
 
 }

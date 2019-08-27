@@ -1,7 +1,5 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.JobClassification;
-import com.sciforma.psnext.api.Organization;
 import com.sciforma.psnext.api.PortfolioFolder;
 import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
@@ -9,6 +7,7 @@ import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
 import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
+import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
 import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
@@ -43,6 +42,8 @@ public class PortfolioFolderProcessor extends AbstractSystemDataProcessor<Portfo
     private DoubleDatedExtractor<PortfolioFolder> doubleDatedExtractor;
     @Autowired
     private StringDatedExtractor<PortfolioFolder> stringDatedExtractor;
+    @Autowired
+    private HierarchicalExtractor<PortfolioFolder> hierarchicalExtractor;
 
     @Override
     protected Optional<PortfolioFolder> getFieldAccessors(SciformaService sciformaService) {
@@ -102,5 +103,10 @@ public class PortfolioFolderProcessor extends AbstractSystemDataProcessor<Portfo
     @Override
     public StringDatedExtractor<PortfolioFolder> getStringDatedExtractor() {
         return stringDatedExtractor;
+    }
+
+    @Override
+    public HierarchicalExtractor<PortfolioFolder> getHierarchicalExtractor() {
+        return hierarchicalExtractor;
     }
 }

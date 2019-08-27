@@ -7,6 +7,7 @@ import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
 import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
+import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
 import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
 import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
@@ -44,6 +45,8 @@ public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> 
     private DoubleDatedExtractor<Resource> doubleDatedExtractor;
     @Autowired
     private StringDatedExtractor<Resource> stringDatedExtractor;
+    @Autowired
+    private HierarchicalExtractor<Resource> hierarchicalExtractor;
 
     @Autowired
     private TimesheetProcessor timesheetProcessor;
@@ -62,10 +65,10 @@ public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> 
 
             timesheetProcessor.process(sciformaService, fieldAccessor);
 
-            cpt++;
-            if (cpt > 5) {
-                break;
-            }
+//            cpt++;
+//            if (cpt > 5) {
+//                break;
+//            }
 
         }
 
@@ -125,5 +128,10 @@ public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> 
     @Override
     public StringDatedExtractor<Resource> getStringDatedExtractor() {
         return stringDatedExtractor;
+    }
+
+    @Override
+    public HierarchicalExtractor<Resource> getHierarchicalExtractor() {
+        return hierarchicalExtractor;
     }
 }

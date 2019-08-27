@@ -79,7 +79,7 @@ public class TaskFieldProvider implements FieldProvider<Task> {
         fields.add(SciformaField.builder().name("Total Float").type(FieldType.DURATION).build());
         fields.add(SciformaField.builder().name("E_TypeActivite").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Unités produites").type(FieldType.EFFORT).build());
-        fields.add(SciformaField.builder().name("Version ID").type(FieldType.DECIMAL).build());
+        fields.add(SciformaField.builder().name("Version ID").type(FieldType.INTEGER).build());
         fields.add(SciformaField.builder().name("WBS").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Work Package ID").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Y_CodeAnalytique_lot").type(FieldType.STRING).build());
