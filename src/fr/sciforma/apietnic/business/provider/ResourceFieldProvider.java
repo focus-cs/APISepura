@@ -22,8 +22,8 @@ public class ResourceFieldProvider implements FieldProvider<Resource> {
         fields.add(SciformaField.builder().name("Compétence directe").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Compétences directes").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("End Date").type(FieldType.DATE).build());
-        fields.add(SciformaField.builder().name("ID").type(FieldType.STRING).build());
-        fields.add(SciformaField.builder().name("Internal ID").type(FieldType.DECIMAL).build());
+//        fields.add(SciformaField.builder().name("ID").type(FieldType.STRING).build());
+//        fields.add(SciformaField.builder().name("Internal ID").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("Job Classification").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Métier direct").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Skills").type(FieldType.LIST).build());

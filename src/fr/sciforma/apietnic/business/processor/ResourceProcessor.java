@@ -57,13 +57,13 @@ public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> 
 
         int cpt = 0;
 
-        for (Resource fieldAccessor : getFieldAccessors(sciformaService)) {
+        for (Resource resource : getFieldAccessors(sciformaService)) {
 
-            Optional<Double> internalId = (Optional<Double>) extractorMap.get(FieldType.DECIMAL).extract(fieldAccessor, "Internal ID");
+            Optional<Double> internalId = (Optional<Double>) extractorMap.get(FieldType.DECIMAL).extract(resource, "Internal ID");
 
-            internalId.ifPresent(aDouble -> resourcesById.putIfAbsent(aDouble, fieldAccessor));
+            internalId.ifPresent(aDouble -> resourcesById.putIfAbsent(aDouble, resource));
 
-            timesheetProcessor.process(sciformaService, fieldAccessor);
+            timesheetProcessor.process(sciformaService, resource);
 
 //            cpt++;
 //            if (cpt > 5) {
