@@ -64,7 +64,7 @@ public class TaskFieldProvider implements FieldProvider<Task> {
         fields.add(SciformaField.builder().name("ID").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Index performance (TCPI)").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("Index prévision (SPI)").type(FieldType.DECIMAL).build());
-        fields.add(SciformaField.builder().name("Internal ID").type(FieldType.DECIMAL).build());
+        fields.add(SciformaField.builder().name("Internal ID").type(FieldType.INTEGER).build());
         fields.add(SciformaField.builder().name("Is Parent").type(FieldType.BOOLEAN).build());
         fields.add(SciformaField.builder().name("Manager 1").type(FieldType.USER).build());
         fields.add(SciformaField.builder().name("Manager 2").type(FieldType.USER).build());
