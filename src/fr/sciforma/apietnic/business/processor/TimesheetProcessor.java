@@ -11,6 +11,7 @@ import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
 import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.DecimalNoPrecisionExtractor;
 import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
 import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
@@ -42,6 +43,8 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
     private StringExtractor<TimesheetAssignment> stringExtractor;
     @Autowired
     private DecimalExtractor<TimesheetAssignment> decimalExtractor;
+    @Autowired
+    private DecimalNoPrecisionExtractor<TimesheetAssignment> decimalNoPrecisionExtractor;
     @Autowired
     private BooleanExtractor<TimesheetAssignment> booleanExtractor;
     @Autowired
@@ -201,6 +204,11 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
     @Override
     public DecimalExtractor<TimesheetAssignment> getDecimalExtractor() {
         return decimalExtractor;
+    }
+
+    @Override
+    public DecimalNoPrecisionExtractor<TimesheetAssignment> getDecimalNoPrecisionExtractor() {
+        return decimalNoPrecisionExtractor;
     }
 
     @Override

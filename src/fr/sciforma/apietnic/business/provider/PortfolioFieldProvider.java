@@ -20,7 +20,7 @@ public class PortfolioFieldProvider implements FieldProvider<PortfolioFolder> {
     public void init() {
         fields = new ArrayList<>();
         fields.add(SciformaField.builder().name("Description").type(FieldType.STRING).build());
-        fields.add(SciformaField.builder().name("Internal ID").type(FieldType.INTEGER).build());
+        fields.add(SciformaField.builder().name("Internal ID").type(FieldType.DECIMAL_NO_PRECISION).build());
         fields.add(SciformaField.builder().name("Managers").type(FieldType.LIST).build());
         fields.add(SciformaField.builder().name("Name").type(FieldType.HIERARCHICAL).build());
     }

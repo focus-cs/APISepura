@@ -9,6 +9,7 @@ import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
 import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.DecimalNoPrecisionExtractor;
 import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
 import fr.sciforma.apietnic.business.extractor.Extractor;
@@ -27,6 +28,7 @@ import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -44,10 +46,8 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
 
     @Value("${csv.delimiter}")
     protected String csvDelimiter;
-    @Autowired
-    FieldProvider<T> fieldProvider;
-    @Autowired
-    CsvHelper<T> csvHelper;
+    protected FieldProvider<T> fieldProvider;
+    protected CsvHelper<T> csvHelper;
 
     Map<FieldType, Extractor<T, ?>> extractorMap = new EnumMap<>(FieldType.class);
 
@@ -55,6 +55,7 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
     public void postConstruct() {
         extractorMap.putIfAbsent(FieldType.STRING, getStringExtractor());
         extractorMap.putIfAbsent(FieldType.DECIMAL, getDecimalExtractor());
+        extractorMap.putIfAbsent(FieldType.DECIMAL_NO_PRECISION, getDecimalNoPrecisionExtractor());
         extractorMap.putIfAbsent(FieldType.BOOLEAN, getBooleanExtractor());
         extractorMap.putIfAbsent(FieldType.COST, getDecimalExtractor());
         extractorMap.putIfAbsent(FieldType.EFFORT, getEffortExtractor());
@@ -89,6 +90,12 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
 
         }
         return csvLine.toString();
+    }
+
+    List<String> splitCsvLine(String csvLine) {
+
+        return Arrays.asList(csvLine.split(csvDelimiter));
+
     }
 
     Optional<String> buildTimeDistributedCsvLine(T distributedValue, LocalDate localDate) throws PSException {
@@ -155,6 +162,8 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
     public abstract StringExtractor<T> getStringExtractor();
 
     public abstract DecimalExtractor<T> getDecimalExtractor();
+
+    public abstract DecimalNoPrecisionExtractor<T> getDecimalNoPrecisionExtractor();
 
     public abstract BooleanExtractor<T> getBooleanExtractor();
 

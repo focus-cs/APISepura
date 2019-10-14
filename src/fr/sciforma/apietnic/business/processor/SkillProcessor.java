@@ -6,6 +6,7 @@ import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
 import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.DecimalNoPrecisionExtractor;
 import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
 import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
@@ -13,6 +14,7 @@ import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
 import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.StringExtractor;
+import fr.sciforma.apietnic.business.model.SkillBo;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +26,14 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
-public class SkillProcessor extends AbstractSystemDataProcessor<Skill> {
+public class SkillProcessor extends AbstractSystemDataProcessor<Skill, SkillBo> {
 
     @Autowired
     private StringExtractor<Skill> stringExtractor;
     @Autowired
     private DecimalExtractor<Skill> decimalExtractor;
+    @Autowired
+    private DecimalNoPrecisionExtractor<Skill> decimalNoPrecisionExtractor;
     @Autowired
     private BooleanExtractor<Skill> booleanExtractor;
     @Autowired
@@ -102,6 +106,11 @@ public class SkillProcessor extends AbstractSystemDataProcessor<Skill> {
     }
 
     @Override
+    protected SkillBo buildBusinessObject(List<String> fields) {
+        return null;
+    }
+
+    @Override
     public StringExtractor<Skill> getStringExtractor() {
         return stringExtractor;
     }
@@ -109,6 +118,11 @@ public class SkillProcessor extends AbstractSystemDataProcessor<Skill> {
     @Override
     public DecimalExtractor<Skill> getDecimalExtractor() {
         return decimalExtractor;
+    }
+
+    @Override
+    public DecimalNoPrecisionExtractor<Skill> getDecimalNoPrecisionExtractor() {
+        return decimalNoPrecisionExtractor;
     }
 
     @Override

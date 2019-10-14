@@ -5,6 +5,7 @@ import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
 import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.DecimalNoPrecisionExtractor;
 import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
 import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
@@ -12,6 +13,7 @@ import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
 import fr.sciforma.apietnic.business.extractor.ListExtractor;
 import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.StringExtractor;
+import fr.sciforma.apietnic.business.model.JobClassificationBo;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,12 +22,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class JobClassificationProcessor extends AbstractSystemDataProcessor<JobClassification> {
+public class JobClassificationProcessor extends AbstractSystemDataProcessor<JobClassification, JobClassificationBo> {
 
     @Autowired
     private StringExtractor<JobClassification> stringExtractor;
     @Autowired
     private DecimalExtractor<JobClassification> decimalExtractor;
+    @Autowired
+    private DecimalNoPrecisionExtractor<JobClassification> decimalNoPrecisionExtractor;
     @Autowired
     private BooleanExtractor<JobClassification> booleanExtractor;
     @Autowired
@@ -56,6 +60,11 @@ public class JobClassificationProcessor extends AbstractSystemDataProcessor<JobC
     }
 
     @Override
+    protected JobClassificationBo buildBusinessObject(List<String> fields) {
+        return null;
+    }
+
+    @Override
     public StringExtractor<JobClassification> getStringExtractor() {
         return stringExtractor;
     }
@@ -63,6 +72,11 @@ public class JobClassificationProcessor extends AbstractSystemDataProcessor<JobC
     @Override
     public DecimalExtractor<JobClassification> getDecimalExtractor() {
         return decimalExtractor;
+    }
+
+    @Override
+    public DecimalNoPrecisionExtractor<JobClassification> getDecimalNoPrecisionExtractor() {
+        return decimalNoPrecisionExtractor;
     }
 
     @Override

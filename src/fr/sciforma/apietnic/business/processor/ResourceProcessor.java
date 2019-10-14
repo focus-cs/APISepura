@@ -5,6 +5,7 @@ import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
 import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.DecimalNoPrecisionExtractor;
 import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
 import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
@@ -29,6 +30,8 @@ public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> 
     private StringExtractor<Resource> stringExtractor;
     @Autowired
     private DecimalExtractor<Resource> decimalExtractor;
+    @Autowired
+    private DecimalNoPrecisionExtractor<Resource> decimalNoPrecisionExtractor;
     @Autowired
     private BooleanExtractor<Resource> booleanExtractor;
     @Autowired
@@ -65,10 +68,10 @@ public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> 
 
             timesheetProcessor.process(sciformaService, resource);
 
-//            cpt++;
-//            if (cpt > 5) {
-//                break;
-//            }
+            cpt++;
+            if (cpt > 5) {
+                break;
+            }
 
         }
 
@@ -88,6 +91,11 @@ public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> 
     @Override
     public DecimalExtractor<Resource> getDecimalExtractor() {
         return decimalExtractor;
+    }
+
+    @Override
+    public DecimalNoPrecisionExtractor<Resource> getDecimalNoPrecisionExtractor() {
+        return decimalNoPrecisionExtractor;
     }
 
     @Override

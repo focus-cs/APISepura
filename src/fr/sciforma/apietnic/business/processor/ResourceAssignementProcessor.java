@@ -7,6 +7,7 @@ import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
 import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.DecimalNoPrecisionExtractor;
 import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
 import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
@@ -30,6 +31,8 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
     private StringExtractor<ResAssignment> stringExtractor;
     @Autowired
     private DecimalExtractor<ResAssignment> decimalExtractor;
+    @Autowired
+    private DecimalNoPrecisionExtractor<ResAssignment> decimalNoPrecisionExtractor;
     @Autowired
     private BooleanExtractor<ResAssignment> booleanExtractor;
     @Autowired
@@ -94,6 +97,11 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
     @Override
     public DecimalExtractor<ResAssignment> getDecimalExtractor() {
         return decimalExtractor;
+    }
+
+    @Override
+    public DecimalNoPrecisionExtractor<ResAssignment> getDecimalNoPrecisionExtractor() {
+        return decimalNoPrecisionExtractor;
     }
 
     @Override

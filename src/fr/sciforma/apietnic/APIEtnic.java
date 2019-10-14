@@ -25,13 +25,9 @@ public class APIEtnic {
     @Autowired
     ProjectProcessor projectProcessor;
     @Autowired
-    UserProcessor userProcessor;
-    @Autowired
     JobClassificationProcessor jobClassificationProcessor;
     @Autowired
     OrganizationProcessor organizationProcessor;
-    @Autowired
-    PortfolioFolderProcessor portfolioFolderProcessor;
     @Autowired
     SkillProcessor skillProcessor;
 
@@ -59,11 +55,9 @@ public class APIEtnic {
 
             if (sciformaService.createConnection()) {
 
-                projectProcessor.process(sciformaService);
-                userProcessor.process(sciformaService);
+//                projectProcessor.process(sciformaService);
                 jobClassificationProcessor.process(sciformaService);
                 organizationProcessor.process(sciformaService);
-                portfolioFolderProcessor.process(sciformaService);
             }
 
         } catch (Exception e) {

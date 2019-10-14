@@ -9,6 +9,7 @@ import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
 import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
+import fr.sciforma.apietnic.business.extractor.DecimalNoPrecisionExtractor;
 import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
 import fr.sciforma.apietnic.business.extractor.EffortExtractor;
 import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
@@ -40,6 +41,8 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
     @Autowired
     private DecimalExtractor<User> decimalExtractor;
     @Autowired
+    private DecimalNoPrecisionExtractor<User> decimalNoPrecisionExtractor;
+    @Autowired
     private BooleanExtractor<User> booleanExtractor;
     @Autowired
     private DateExtractor<User> dateExtractor;
@@ -66,12 +69,11 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
     @Autowired
     SkillUserCsvHelper skillUSerCsvHelper;
 
-    @Override
-    public void process(SciformaService sciformaService) {
+    public Map<Double, User> getUsersById(SciformaService sciformaService) {
 
         Logger.info("Processing file " + csvHelper.getFilename());
 
-        Map<Double, User> userById = new HashMap<>();
+        Map<Double, User> usersById = new HashMap<>();
 
         StringJoiner csvLine;
 
@@ -81,7 +83,7 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
 
             Optional<Double> internalId = (Optional<Double>) extractorMap.get(FieldType.DECIMAL).extract(fieldAccessor, "Internal ID");
 
-            internalId.ifPresent(aDouble -> userById.putIfAbsent(aDouble, fieldAccessor));
+            internalId.ifPresent(aDouble -> usersById.putIfAbsent(aDouble, fieldAccessor));
 
 //            cpt++;
 //            if (cpt > 5) {
@@ -92,7 +94,7 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
 
         Map<Double, Resource> resourcesById = resourceProcessor.getResourcesById(sciformaService);
 
-        for (Map.Entry<Double, User> entry : userById.entrySet()) {
+        for (Map.Entry<Double, User> entry : usersById.entrySet()) {
 
             csvLine = new StringJoiner(csvDelimiter);
             csvLine.add(buildCsvLine(entry.getValue()));
@@ -115,7 +117,7 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
 
             Map<String, Skill> skillsByName = skillProcessor.getSkillsByName(sciformaService);
 
-            for (Map.Entry<Double, User> userEntry : userById.entrySet()) {
+            for (Map.Entry<Double, User> userEntry : usersById.entrySet()) {
 
                 if (resourcesById.containsKey(userEntry.getKey())) {
 
@@ -151,6 +153,8 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
             Logger.error(e);
 
         }
+
+        return usersById;
     }
 
     @Override
@@ -166,6 +170,11 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
     @Override
     public DecimalExtractor<User> getDecimalExtractor() {
         return decimalExtractor;
+    }
+
+    @Override
+    public DecimalNoPrecisionExtractor<User> getDecimalNoPrecisionExtractor() {
+        return decimalNoPrecisionExtractor;
     }
 
     @Override
