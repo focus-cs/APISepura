@@ -10,12 +10,12 @@ import java.util.Date;
 import java.util.Optional;
 
 @Component
-public class DateExtractor<T extends FieldAccessor> implements Extractor<T, Date> {
+public class DateExtractor implements Extractor<Date> {
 
     private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
     @Override
-    public Optional<String> extractAsString(T fieldAccessor, String fieldName) {
+    public Optional<String> extractAsString(FieldAccessor fieldAccessor, String fieldName) {
 
         try {
 
@@ -32,7 +32,7 @@ public class DateExtractor<T extends FieldAccessor> implements Extractor<T, Date
     }
 
     @Override
-    public Optional<Date> extract(T fieldAccessor, String fieldName) {
+    public Optional<Date> extract(FieldAccessor fieldAccessor, String fieldName) {
 
         try {
 

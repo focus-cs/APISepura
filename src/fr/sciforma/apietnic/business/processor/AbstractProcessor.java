@@ -4,6 +4,8 @@ import com.sciforma.psnext.api.DatedData;
 import com.sciforma.psnext.api.DoubleDatedData;
 import com.sciforma.psnext.api.FieldAccessor;
 import com.sciforma.psnext.api.PSException;
+import com.sciforma.psnext.api.PortfolioFolder;
+import com.sciforma.psnext.api.User;
 import fr.sciforma.apietnic.business.csv.CsvHelper;
 import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
@@ -46,32 +48,55 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
 
     @Value("${csv.delimiter}")
     protected String csvDelimiter;
-    protected FieldProvider<T> fieldProvider;
-    protected CsvHelper<T> csvHelper;
 
-    Map<FieldType, Extractor<T, ?>> extractorMap = new EnumMap<>(FieldType.class);
+    @Autowired
+    private StringExtractor stringExtractor;
+    @Autowired
+    private DecimalExtractor decimalExtractor;
+    @Autowired
+    private DecimalNoPrecisionExtractor decimalNoPrecisionExtractor;
+    @Autowired
+    private BooleanExtractor booleanExtractor;
+    @Autowired
+    private DateExtractor dateExtractor;
+    @Autowired
+    private IntegerExtractor integerExtractor;
+    @Autowired
+    private ListExtractor listExtractor;
+    @Autowired
+    private CalendarExtractor calendarExtractor;
+    @Autowired
+    private EffortExtractor effortExtractor;
+    @Autowired
+    private DoubleDatedExtractor doubleDatedExtractor;
+    @Autowired
+    private StringDatedExtractor stringDatedExtractor;
+    @Autowired
+    private HierarchicalExtractor hierarchicalExtractor;
+
+    Map<FieldType, Extractor<?>> extractorMap = new EnumMap<>(FieldType.class);
 
     @PostConstruct
     public void postConstruct() {
-        extractorMap.putIfAbsent(FieldType.STRING, getStringExtractor());
-        extractorMap.putIfAbsent(FieldType.DECIMAL, getDecimalExtractor());
-        extractorMap.putIfAbsent(FieldType.DECIMAL_NO_PRECISION, getDecimalNoPrecisionExtractor());
-        extractorMap.putIfAbsent(FieldType.BOOLEAN, getBooleanExtractor());
-        extractorMap.putIfAbsent(FieldType.COST, getDecimalExtractor());
-        extractorMap.putIfAbsent(FieldType.EFFORT, getEffortExtractor());
-        extractorMap.putIfAbsent(FieldType.DATE, getDateExtractor());
-        extractorMap.putIfAbsent(FieldType.FORMULA, getStringExtractor());
-        extractorMap.putIfAbsent(FieldType.DURATION, getDecimalExtractor());
-        extractorMap.putIfAbsent(FieldType.INTEGER, getIntegerExtractor());
-        extractorMap.putIfAbsent(FieldType.USER, getStringExtractor());
-        extractorMap.putIfAbsent(FieldType.RESOURCE, getStringExtractor());
-        extractorMap.putIfAbsent(FieldType.URL, getStringExtractor());
-        extractorMap.putIfAbsent(FieldType.CALENDAR, getStringExtractor());
-        extractorMap.putIfAbsent(FieldType.EFFORT_RATE, getStringExtractor());
-        extractorMap.putIfAbsent(FieldType.LIST, getListExtractor());
-        extractorMap.putIfAbsent(FieldType.DOUBLE_DATED, getDoubleDatedExtractor());
-        extractorMap.putIfAbsent(FieldType.STRING_DATED, getStringDatedExtractor());
-        extractorMap.putIfAbsent(FieldType.HIERARCHICAL, getHierarchicalExtractor());
+        extractorMap.putIfAbsent(FieldType.STRING, stringExtractor);
+        extractorMap.putIfAbsent(FieldType.DECIMAL, decimalExtractor);
+        extractorMap.putIfAbsent(FieldType.DECIMAL_NO_PRECISION, decimalNoPrecisionExtractor);
+        extractorMap.putIfAbsent(FieldType.BOOLEAN, booleanExtractor);
+        extractorMap.putIfAbsent(FieldType.COST, decimalExtractor);
+        extractorMap.putIfAbsent(FieldType.EFFORT, effortExtractor);
+        extractorMap.putIfAbsent(FieldType.DATE, dateExtractor);
+        extractorMap.putIfAbsent(FieldType.FORMULA, stringExtractor);
+        extractorMap.putIfAbsent(FieldType.DURATION, decimalExtractor);
+        extractorMap.putIfAbsent(FieldType.INTEGER, integerExtractor);
+        extractorMap.putIfAbsent(FieldType.USER, stringExtractor);
+        extractorMap.putIfAbsent(FieldType.RESOURCE, stringExtractor);
+        extractorMap.putIfAbsent(FieldType.URL, stringExtractor);
+        extractorMap.putIfAbsent(FieldType.CALENDAR, stringExtractor);
+        extractorMap.putIfAbsent(FieldType.EFFORT_RATE, stringExtractor);
+        extractorMap.putIfAbsent(FieldType.LIST, listExtractor);
+        extractorMap.putIfAbsent(FieldType.DOUBLE_DATED, doubleDatedExtractor);
+        extractorMap.putIfAbsent(FieldType.STRING_DATED, stringDatedExtractor);
+        extractorMap.putIfAbsent(FieldType.HIERARCHICAL, hierarchicalExtractor);
 
         sdf = new SimpleDateFormat("dd/MM/yyyy");
     }
@@ -79,7 +104,7 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
     String buildCsvLine(T fieldAccessor) {
         StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
-        for (SciformaField sciformaField : getFieldsToExtract()) {
+        for (SciformaField sciformaField : getFieldProvider().getFields()) {
 
             Optional<String> value = extractorMap.get(sciformaField.getType()).extractAsString(fieldAccessor, sciformaField.getName());
             if (value.isPresent()) {
@@ -101,11 +126,11 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
     Optional<String> buildTimeDistributedCsvLine(T distributedValue, LocalDate localDate) throws PSException {
         Map<String, String> header = new HashMap<>();
 
-        for (String headerItem : csvHelper.getHeaderAsList()) {
+        for (String headerItem : getCsvHelper().getHeaderAsList()) {
             header.put(headerItem, null);
         }
 
-        for (SciformaField sciformaField : getFieldsToExtract()) {
+        for (SciformaField sciformaField : getFieldProvider().getFields()) {
 
             if (sciformaField.getType().equals(FieldType.EFFORT)) {
 
@@ -133,7 +158,7 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
 
             StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
-            for (String headerItem : csvHelper.getHeaderAsList()) {
+            for (String headerItem : getCsvHelper().getHeaderAsList()) {
 
                 if (header.containsKey(headerItem)) {
 
@@ -155,32 +180,7 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
 
     }
 
-    List<SciformaField> getFieldsToExtract() {
-        return fieldProvider.getFields();
-    }
-
-    public abstract StringExtractor<T> getStringExtractor();
-
-    public abstract DecimalExtractor<T> getDecimalExtractor();
-
-    public abstract DecimalNoPrecisionExtractor<T> getDecimalNoPrecisionExtractor();
-
-    public abstract BooleanExtractor<T> getBooleanExtractor();
-
-    public abstract DateExtractor<T> getDateExtractor();
-
-    public abstract IntegerExtractor<T> getIntegerExtractor();
-
-    public abstract ListExtractor<T> getListExtractor();
-
-    public abstract CalendarExtractor<T> getCalendarExtractor();
-
-    public abstract EffortExtractor<T> getEffortExtractor();
-
-    public abstract DoubleDatedExtractor<T> getDoubleDatedExtractor();
-
-    public abstract StringDatedExtractor<T> getStringDatedExtractor();
-
-    public abstract HierarchicalExtractor<T> getHierarchicalExtractor();
+    public abstract FieldProvider getFieldProvider();
+    public abstract CsvHelper getCsvHelper();
 
 }

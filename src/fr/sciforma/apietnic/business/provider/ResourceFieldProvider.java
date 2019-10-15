@@ -1,6 +1,5 @@
 package fr.sciforma.apietnic.business.provider;
 
-import com.sciforma.psnext.api.Resource;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
 import lombok.Getter;
@@ -12,7 +11,7 @@ import java.util.List;
 
 @Component
 @Getter
-public class ResourceFieldProvider implements FieldProvider<Resource> {
+public class ResourceFieldProvider implements FieldProvider {
 
     private List<SciformaField> fields;
 

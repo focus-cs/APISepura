@@ -1,6 +1,5 @@
 package fr.sciforma.apietnic.business.provider;
 
-import com.sciforma.psnext.api.Project;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
 import lombok.Getter;
@@ -12,7 +11,7 @@ import java.util.List;
 
 @Component
 @Getter
-public class ProjectFieldProvider implements FieldProvider<Project> {
+public class ProjectFieldProvider implements FieldProvider {
 
     private List<SciformaField> fields;
 
@@ -73,6 +72,7 @@ public class ProjectFieldProvider implements FieldProvider<Project> {
         fields.add(SciformaField.builder().name("Modified By").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Modified Date").type(FieldType.DATE).build());
         fields.add(SciformaField.builder().name("Name").type(FieldType.STRING).build());
+        fields.add(SciformaField.builder().name("Owning Organization").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Portfolio Folder").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Published Date").type(FieldType.DATE).build());
         fields.add(SciformaField.builder().name("Start").type(FieldType.DATE).build());

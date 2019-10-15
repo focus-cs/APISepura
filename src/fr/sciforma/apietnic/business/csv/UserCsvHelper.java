@@ -1,8 +1,10 @@
 package fr.sciforma.apietnic.business.csv;
 
-import com.sciforma.psnext.api.User;
 import fr.sciforma.apietnic.business.model.SciformaField;
+import fr.sciforma.apietnic.business.provider.FieldProvider;
 import fr.sciforma.apietnic.business.provider.ResourceFieldProvider;
+import fr.sciforma.apietnic.business.provider.UserFieldProvider;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -11,29 +13,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class UserCsvHelper extends AbstractCsvHelper<User> {
+@Getter
+public class UserCsvHelper extends AbstractCsvHelper {
 
     @Value("${filename.resources}")
     private String filename;
 
     @Autowired
-    private ResourceFieldProvider resourceFieldProvider;
-
-    @Override
-    public String getFilename() {
-        return filename;
-    }
+    private ResourceFieldProvider fieldProvider;
+    @Autowired
+    private UserFieldProvider userFieldProvider;
 
     @Override
     protected List<String> getHeader() {
 
         List<String> header = new ArrayList<>();
 
-        for (SciformaField sciformaField : fieldProvider.getFields()) {
+        for (SciformaField sciformaField : userFieldProvider.getFields()) {
             header.add(sciformaField.getName());
         }
 
-        for (SciformaField sciformaField : resourceFieldProvider.getFields()) {
+        for (SciformaField sciformaField : fieldProvider.getFields()) {
             header.add(sciformaField.getName());
         }
 

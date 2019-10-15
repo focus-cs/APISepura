@@ -2,7 +2,7 @@ package fr.sciforma.apietnic.business.csv;
 
 import java.util.List;
 
-public interface CsvHelper<T> {
+public interface CsvHelper {
 
     void addLine(String line);
     void flush();

@@ -13,13 +13,13 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 @Component
-public class DoubleDatedExtractor<T extends FieldAccessor> implements Extractor<T, List<DoubleDatedData>> {
+public class DoubleDatedExtractor implements Extractor<List<DoubleDatedData>> {
 
     @Value("${multivalue.delimiter}")
     protected String delimiter;
 
     @Override
-    public Optional<String> extractAsString(T fieldAccessor, String fieldName) {
+    public Optional<String> extractAsString(FieldAccessor fieldAccessor, String fieldName) {
 
         Optional<List<DoubleDatedData>> extract = extract(fieldAccessor, fieldName, DatedData.NONE);
 
@@ -37,13 +37,13 @@ public class DoubleDatedExtractor<T extends FieldAccessor> implements Extractor<
     }
 
     @Override
-    public Optional<List<DoubleDatedData>> extract(T fieldAccessor, String fieldName) {
+    public Optional<List<DoubleDatedData>> extract(FieldAccessor fieldAccessor, String fieldName) {
 
         return extract(fieldAccessor, fieldName, DatedData.NONE);
 
     }
 
-    private Optional<List<DoubleDatedData>> extract(T fieldAccessor, String fieldName, int granularity) {
+    private Optional<List<DoubleDatedData>> extract(FieldAccessor fieldAccessor, String fieldName, int granularity) {
 
         try {
             return Optional.of(fieldAccessor.getDatedData(fieldName, granularity));

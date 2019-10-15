@@ -15,17 +15,17 @@ public abstract class AbstractFieldAccessorProcessor<T extends FieldAccessor> ex
 
     public void process(SciformaService sciformaService) {
 
-        Logger.info("Processing file " + csvHelper.getFilename());
+        Logger.info("Processing file " + getCsvHelper().getFilename());
 
         for (T fieldAccessor : getFieldAccessors(sciformaService)) {
 
-            csvHelper.addLine(buildCsvLine(fieldAccessor));
+            getCsvHelper().addLine(buildCsvLine(fieldAccessor));
 
         }
 
-        csvHelper.flush();
+        getCsvHelper().flush();
 
-        Logger.info("File " + csvHelper.getFilename() + " has been processed successfully");
+        Logger.info("File " + getCsvHelper().getFilename() + " has been processed successfully");
     }
 
 }

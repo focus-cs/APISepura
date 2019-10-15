@@ -1,6 +1,5 @@
 package fr.sciforma.apietnic.business.provider;
 
-import com.sciforma.psnext.api.ResAssignment;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
 import lombok.Getter;
@@ -12,7 +11,7 @@ import java.util.List;
 
 @Component
 @Getter
-public class ResourceAssignementFieldProvider implements FieldProvider<ResAssignment> {
+public class ResourceAssignementFieldProvider implements FieldProvider {
 
     private List<SciformaField> fields;
 
@@ -69,12 +68,12 @@ public class ResourceAssignementFieldProvider implements FieldProvider<ResAssign
         fields.add(SciformaField.builder().name("Job Classification").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Name").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Physical % Complete").type(FieldType.DECIMAL).build());
-        fields.add(SciformaField.builder().name("Project IID").type(FieldType.DECIMAL).build());
+        fields.add(SciformaField.builder().name("Project IID").type(FieldType.DECIMAL_NO_PRECISION).build());
         fields.add(SciformaField.builder().name("Rate").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("Remaining Effort").type(FieldType.EFFORT).build());
-        fields.add(SciformaField.builder().name("Resource IID").type(FieldType.DECIMAL).build());
+        fields.add(SciformaField.builder().name("Resource IID").type(FieldType.DECIMAL_NO_PRECISION).build());
         fields.add(SciformaField.builder().name("Skills").type(FieldType.LIST).build());
-        fields.add(SciformaField.builder().name("Task IID").type(FieldType.DECIMAL).build());
+        fields.add(SciformaField.builder().name("Task IID").type(FieldType.DECIMAL_NO_PRECISION).build());
         fields.add(SciformaField.builder().name("Version ID").type(FieldType.INTEGER).build());
     }
 }

@@ -4,7 +4,7 @@ import com.sciforma.psnext.api.FieldAccessor;
 
 import java.util.Optional;
 
-public interface Extractor<P extends FieldAccessor, T> {
-    Optional<String> extractAsString(P fieldAccessor, String fieldName);
-    Optional<T> extract(P fieldAccessor, String fieldName);
+public interface Extractor<T> {
+    Optional<String> extractAsString(FieldAccessor fieldAccessor, String fieldName);
+    Optional<T> extract(FieldAccessor fieldAccessor, String fieldName);
 }

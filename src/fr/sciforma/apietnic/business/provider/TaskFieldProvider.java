@@ -1,6 +1,5 @@
 package fr.sciforma.apietnic.business.provider;
 
-import com.sciforma.psnext.api.Task;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
 import lombok.Getter;
@@ -12,7 +11,7 @@ import java.util.List;
 
 @Component
 @Getter
-public class TaskFieldProvider implements FieldProvider<Task> {
+public class TaskFieldProvider implements FieldProvider {
 
     private List<SciformaField> fields;
 
@@ -55,9 +54,9 @@ public class TaskFieldProvider implements FieldProvider<Task> {
         fields.add(SciformaField.builder().name("Baseline8 Start").type(FieldType.DATE).build());
         fields.add(SciformaField.builder().name("Baseline9 Finish").type(FieldType.DATE).build());
         fields.add(SciformaField.builder().name("Baseline9 Start").type(FieldType.DATE).build());
-        fields.add(SciformaField.builder().name("Actual Labor Effort").type(FieldType.EFFORT).build());
-        fields.add(SciformaField.builder().name("Baseline Labor Effort").type(FieldType.EFFORT).build());
-        fields.add(SciformaField.builder().name("Remaining Labor Effort").type(FieldType.EFFORT).build());
+        fields.add(SciformaField.builder().name("Actual Labor Effort").type(FieldType.DECIMAL).build());
+        fields.add(SciformaField.builder().name("Baseline Labor Effort").type(FieldType.DECIMAL).build());
+        fields.add(SciformaField.builder().name("Remaining Labor Effort").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("Description").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Duration").type(FieldType.DURATION).build());
         fields.add(SciformaField.builder().name("Finish").type(FieldType.DATE).build());
@@ -77,7 +76,7 @@ public class TaskFieldProvider implements FieldProvider<Task> {
         fields.add(SciformaField.builder().name("Start Delay").type(FieldType.DURATION).build());
         fields.add(SciformaField.builder().name("Total Float").type(FieldType.DURATION).build());
         fields.add(SciformaField.builder().name("E_TypeActivite").type(FieldType.STRING).build());
-        fields.add(SciformaField.builder().name("Unités produites").type(FieldType.EFFORT).build());
+        fields.add(SciformaField.builder().name("Unités produites").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("Version ID").type(FieldType.INTEGER).build());
         fields.add(SciformaField.builder().name("WBS").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Work Package ID").type(FieldType.STRING).build());

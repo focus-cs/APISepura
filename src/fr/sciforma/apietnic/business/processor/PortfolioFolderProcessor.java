@@ -1,59 +1,125 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.FieldAccessor;
+import com.sciforma.psnext.api.PSException;
 import com.sciforma.psnext.api.PortfolioFolder;
-import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
-import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
-import fr.sciforma.apietnic.business.extractor.DateExtractor;
-import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
-import fr.sciforma.apietnic.business.extractor.DecimalNoPrecisionExtractor;
-import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
-import fr.sciforma.apietnic.business.extractor.EffortExtractor;
-import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
-import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
-import fr.sciforma.apietnic.business.extractor.ListExtractor;
-import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
-import fr.sciforma.apietnic.business.extractor.StringExtractor;
-import fr.sciforma.apietnic.business.model.BaseBo;
-import fr.sciforma.apietnic.business.model.PortfolioFolderBo;
+import com.sciforma.psnext.api.Skill;
+import fr.sciforma.apietnic.business.csv.PortfolioFolderCsvHelper;
+import fr.sciforma.apietnic.business.model.SciformaField;
+import fr.sciforma.apietnic.business.provider.PortfolioFieldProvider;
 import fr.sciforma.apietnic.service.SciformaService;
+import lombok.Getter;
+import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 @Component
-public class PortfolioFolderProcessor extends AbstractSystemDataProcessor<PortfolioFolder, PortfolioFolderBo> {
+@Getter
+public class PortfolioFolderProcessor extends AbstractSystemDataProcessor<PortfolioFolder> {
+
+    @Value("${multivalue.delimiter}")
+    protected String delimiter;
 
     @Autowired
-    private StringExtractor<PortfolioFolder> stringExtractor;
+    private PortfolioFieldProvider fieldProvider;
     @Autowired
-    private DecimalExtractor<PortfolioFolder> decimalExtractor;
-    @Autowired
-    private DecimalNoPrecisionExtractor<PortfolioFolder> decimalNoPrecisionExtractor;
-    @Autowired
-    private BooleanExtractor<PortfolioFolder> booleanExtractor;
-    @Autowired
-    private DateExtractor<PortfolioFolder> dateExtractor;
-    @Autowired
-    private IntegerExtractor<PortfolioFolder> integerExtractor;
-    @Autowired
-    private ListExtractor<PortfolioFolder> listExtractor;
-    @Autowired
-    private CalendarExtractor<PortfolioFolder> calendarExtractor;
-    @Autowired
-    private EffortExtractor<PortfolioFolder> effortExtractor;
-    @Autowired
-    private DoubleDatedExtractor<PortfolioFolder> doubleDatedExtractor;
-    @Autowired
-    private StringDatedExtractor<PortfolioFolder> stringDatedExtractor;
-    @Autowired
-    private HierarchicalExtractor<PortfolioFolder> hierarchicalExtractor;
+    private PortfolioFolderCsvHelper csvHelper;
 
-    public Map<Integer, PortfolioFolderBo> getPortfolioFolderById(SciformaService sciformaService) {
-        return process(sciformaService);
+    private Map<String, Integer> portfolioFolderByName;
+
+    public Map<String, Integer> getPortfoliosByName(SciformaService sciformaService, Map<String, Integer> usersByName) {
+
+        Logger.info("Processing file " + getCsvHelper().getFilename());
+
+        portfolioFolderByName = new HashMap<>();
+
+        Optional<PortfolioFolder> fieldAccessors = getFieldAccessors(sciformaService);
+
+        fieldAccessors.ifPresent(portfolioFolder -> parse(portfolioFolder, usersByName));
+
+        getCsvHelper().flush();
+
+        Logger.info("File " + getCsvHelper().getFilename() + " has been processed successfully");
+
+        return portfolioFolderByName;
+
+    }
+
+    private void parse(PortfolioFolder root, Map<String, Integer> usersByName) {
+
+        if (root.getParent() != null) {
+            getCsvHelper().addLine(buildCsvLine(root, usersByName));
+
+            try {
+                portfolioFolderByName.putIfAbsent(root.toString(), Double.valueOf(root.getDoubleField("Internal ID")).intValue());
+            } catch (PSException e) {
+                Logger.error(e);
+            }
+        }
+
+        List<PortfolioFolder> children = getChildren(root);
+
+        if (children != null && !children.isEmpty()) {
+
+            for (PortfolioFolder child : children) {
+
+                parse(child, usersByName);
+
+            }
+
+        }
+
+    }
+
+    String buildCsvLine(PortfolioFolder fieldAccessor, Map<String, Integer> usersByName) {
+        StringJoiner csvLine = new StringJoiner(csvDelimiter);
+
+        for (SciformaField sciformaField : getFieldProvider().getFields()) {
+
+            Optional<String> value = Optional.empty();
+
+            if (sciformaField.getName().equals("Managers")) {
+
+                Optional<?> extract = extractorMap.get(sciformaField.getType()).extract(fieldAccessor, sciformaField.getName());
+
+                if (extract.isPresent()) {
+
+                    List<String> managers = (List<String>) extract.get();
+
+                    StringJoiner managersIds = new StringJoiner(delimiter);
+
+                    for (String manager : managers) {
+
+                        if(usersByName.containsKey(manager)) {
+                            managersIds.add(String.valueOf(usersByName.get(manager)));
+                        }
+
+                    }
+
+                    value = Optional.of(managersIds.toString());
+
+                }
+
+            } else {
+
+                value = extractorMap.get(sciformaField.getType()).extractAsString(fieldAccessor, sciformaField.getName());
+
+            }
+
+            if (value.isPresent()) {
+                csvLine.add(value.get());
+            } else {
+                csvLine.add("");
+            }
+
+        }
+        return csvLine.toString();
     }
 
     @Override
@@ -66,75 +132,4 @@ public class PortfolioFolderProcessor extends AbstractSystemDataProcessor<Portfo
         return fieldAccessor.getChildren();
     }
 
-    @Override
-    protected PortfolioFolderBo buildBusinessObject(List<String> fields) {
-
-        return PortfolioFolderBo.builder()
-                .description(fields.get(0))
-                .internalId(Integer.parseInt(fields.get(1)))
-                .managers()
-                .name(fields.get(3))
-                .build();
-
-    }
-
-    @Override
-    public StringExtractor<PortfolioFolder> getStringExtractor() {
-        return stringExtractor;
-    }
-
-    @Override
-    public DecimalExtractor<PortfolioFolder> getDecimalExtractor() {
-        return decimalExtractor;
-    }
-
-    @Override
-    public DecimalNoPrecisionExtractor<PortfolioFolder> getDecimalNoPrecisionExtractor() {
-        return decimalNoPrecisionExtractor;
-    }
-
-    @Override
-    public BooleanExtractor<PortfolioFolder> getBooleanExtractor() {
-        return booleanExtractor;
-    }
-
-    @Override
-    public DateExtractor<PortfolioFolder> getDateExtractor() {
-        return dateExtractor;
-    }
-
-    @Override
-    public IntegerExtractor<PortfolioFolder> getIntegerExtractor() {
-        return integerExtractor;
-    }
-
-    @Override
-    public ListExtractor<PortfolioFolder> getListExtractor() {
-        return listExtractor;
-    }
-
-    @Override
-    public CalendarExtractor<PortfolioFolder> getCalendarExtractor() {
-        return calendarExtractor;
-    }
-
-    @Override
-    public EffortExtractor<PortfolioFolder> getEffortExtractor() {
-        return effortExtractor;
-    }
-
-    @Override
-    public DoubleDatedExtractor<PortfolioFolder> getDoubleDatedExtractor() {
-        return doubleDatedExtractor;
-    }
-
-    @Override
-    public StringDatedExtractor<PortfolioFolder> getStringDatedExtractor() {
-        return stringDatedExtractor;
-    }
-
-    @Override
-    public HierarchicalExtractor<PortfolioFolder> getHierarchicalExtractor() {
-        return hierarchicalExtractor;
-    }
 }

@@ -1,18 +1,19 @@
 package fr.sciforma.apietnic.business.csv;
 
-import com.sciforma.psnext.api.Project;
+import fr.sciforma.apietnic.business.provider.ProjectFieldProvider;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProjectCsvHelper extends AbstractCsvHelper<Project> {
+@Getter
+public class ProjectCsvHelper extends AbstractCsvHelper {
 
     @Value("${filename.projects}")
     private String filename;
 
-    @Override
-    public String getFilename() {
-        return filename;
-    }
+    @Autowired
+    private ProjectFieldProvider fieldProvider;
 
 }

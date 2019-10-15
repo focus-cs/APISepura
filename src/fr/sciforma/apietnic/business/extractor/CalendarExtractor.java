@@ -9,10 +9,10 @@ import java.util.Calendar;
 import java.util.Optional;
 
 @Component
-public class CalendarExtractor<T extends FieldAccessor> implements Extractor<T, Calendar> {
+public class CalendarExtractor implements Extractor<Calendar> {
 
     @Override
-    public Optional<String> extractAsString(T fieldAccessor, String fieldName) {
+    public Optional<String> extractAsString(FieldAccessor fieldAccessor, String fieldName) {
 
         try {
 
@@ -28,7 +28,7 @@ public class CalendarExtractor<T extends FieldAccessor> implements Extractor<T, 
     }
 
     @Override
-    public Optional<Calendar> extract(T fieldAccessor, String fieldName) {
+    public Optional<Calendar> extract(FieldAccessor fieldAccessor, String fieldName) {
         return Optional.empty();
     }
 

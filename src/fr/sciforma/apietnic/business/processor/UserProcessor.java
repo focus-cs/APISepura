@@ -1,24 +1,13 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.PSException;
 import com.sciforma.psnext.api.Resource;
-import com.sciforma.psnext.api.Skill;
 import com.sciforma.psnext.api.User;
 import fr.sciforma.apietnic.business.csv.SkillUserCsvHelper;
-import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
-import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
-import fr.sciforma.apietnic.business.extractor.DateExtractor;
-import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
-import fr.sciforma.apietnic.business.extractor.DecimalNoPrecisionExtractor;
-import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
-import fr.sciforma.apietnic.business.extractor.EffortExtractor;
-import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
-import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
-import fr.sciforma.apietnic.business.extractor.ListExtractor;
-import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
-import fr.sciforma.apietnic.business.extractor.StringExtractor;
+import fr.sciforma.apietnic.business.csv.UserCsvHelper;
 import fr.sciforma.apietnic.business.model.FieldType;
+import fr.sciforma.apietnic.business.provider.UserFieldProvider;
 import fr.sciforma.apietnic.service.SciformaService;
+import lombok.Getter;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,45 +20,24 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 @Component
+@Getter
 public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
+
+    @Autowired
+    private UserFieldProvider fieldProvider;
+    @Autowired
+    private UserCsvHelper csvHelper;
 
     @Value("${filename.resources}")
     protected String filename;
 
     @Autowired
-    private StringExtractor<User> stringExtractor;
-    @Autowired
-    private DecimalExtractor<User> decimalExtractor;
-    @Autowired
-    private DecimalNoPrecisionExtractor<User> decimalNoPrecisionExtractor;
-    @Autowired
-    private BooleanExtractor<User> booleanExtractor;
-    @Autowired
-    private DateExtractor<User> dateExtractor;
-    @Autowired
-    private IntegerExtractor<User> integerExtractor;
-    @Autowired
-    private ListExtractor<User> listExtractor;
-    @Autowired
-    private CalendarExtractor<User> calendarExtractor;
-    @Autowired
-    private EffortExtractor<User> effortExtractor;
-    @Autowired
-    private DoubleDatedExtractor<User> doubleDatedExtractor;
-    @Autowired
-    private StringDatedExtractor<User> stringDatedExtractor;
-    @Autowired
-    private HierarchicalExtractor<User> hierarchicalExtractor;
-
-    @Autowired
     ResourceProcessor resourceProcessor;
-    @Autowired
-    SkillProcessor skillProcessor;
 
     @Autowired
     SkillUserCsvHelper skillUSerCsvHelper;
 
-    public Map<Double, User> getUsersById(SciformaService sciformaService) {
+    public Map<Double, User> getUsersById(SciformaService sciformaService, Map<Double, Resource> resourcesById) {
 
         Logger.info("Processing file " + csvHelper.getFilename());
 
@@ -92,8 +60,6 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
 
         }
 
-        Map<Double, Resource> resourcesById = resourceProcessor.getResourcesById(sciformaService);
-
         for (Map.Entry<Double, User> entry : usersById.entrySet()) {
 
             csvLine = new StringJoiner(csvDelimiter);
@@ -111,115 +77,12 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
 
         Logger.info("File " + csvHelper.getFilename() + " has been processed successfully");
 
-        Logger.info("Processing file " + skillUSerCsvHelper.getFilename());
-
-        try {
-
-            Map<String, Skill> skillsByName = skillProcessor.getSkillsByName(sciformaService);
-
-            for (Map.Entry<Double, User> userEntry : usersById.entrySet()) {
-
-                if (resourcesById.containsKey(userEntry.getKey())) {
-
-                    List<String> userSkills = resourcesById.get(userEntry.getKey()).getListField("Skills");
-
-                    if (userSkills != null) {
-
-                        for (String userSkill : userSkills) {
-
-                            if (skillsByName.containsKey(userSkill)) {
-
-                                csvLine = new StringJoiner(csvDelimiter);
-                                csvLine.add(String.valueOf(userEntry.getValue().getDoubleField("Internal ID")));
-                                csvLine.add(userEntry.getValue().getStringField("Name"));
-                                csvLine.add(String.valueOf(skillsByName.get(userSkill).getDoubleField("Internal ID")));
-                                csvLine.add(skillsByName.get(userSkill).toString());
-
-                                skillUSerCsvHelper.addLine(csvLine.toString());
-                            }
-
-                        }
-
-                    }
-                }
-
-
-            }
-
-            skillUSerCsvHelper.flush();
-
-        } catch (PSException e) {
-
-            Logger.error(e);
-
-        }
-
         return usersById;
     }
 
     @Override
     protected List<User> getFieldAccessors(SciformaService sciformaService) {
         return sciformaService.getUsers();
-    }
-
-    @Override
-    public StringExtractor<User> getStringExtractor() {
-        return stringExtractor;
-    }
-
-    @Override
-    public DecimalExtractor<User> getDecimalExtractor() {
-        return decimalExtractor;
-    }
-
-    @Override
-    public DecimalNoPrecisionExtractor<User> getDecimalNoPrecisionExtractor() {
-        return decimalNoPrecisionExtractor;
-    }
-
-    @Override
-    public BooleanExtractor<User> getBooleanExtractor() {
-        return booleanExtractor;
-    }
-
-    @Override
-    public DateExtractor<User> getDateExtractor() {
-        return dateExtractor;
-    }
-
-    @Override
-    public IntegerExtractor<User> getIntegerExtractor() {
-        return integerExtractor;
-    }
-
-    @Override
-    public ListExtractor<User> getListExtractor() {
-        return listExtractor;
-    }
-
-    @Override
-    public CalendarExtractor<User> getCalendarExtractor() {
-        return calendarExtractor;
-    }
-
-    @Override
-    public EffortExtractor<User> getEffortExtractor() {
-        return effortExtractor;
-    }
-
-    @Override
-    public DoubleDatedExtractor<User> getDoubleDatedExtractor() {
-        return doubleDatedExtractor;
-    }
-
-    @Override
-    public StringDatedExtractor<User> getStringDatedExtractor() {
-        return stringDatedExtractor;
-    }
-
-    @Override
-    public HierarchicalExtractor<User> getHierarchicalExtractor() {
-        return hierarchicalExtractor;
     }
 
 }

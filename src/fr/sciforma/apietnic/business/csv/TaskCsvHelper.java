@@ -1,18 +1,19 @@
 package fr.sciforma.apietnic.business.csv;
 
-import com.sciforma.psnext.api.Task;
+import fr.sciforma.apietnic.business.provider.TaskFieldProvider;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TaskCsvHelper extends AbstractCsvHelper<Task> {
+@Getter
+public class TaskCsvHelper extends AbstractCsvHelper {
 
     @Value("${filename.tasks}")
     private String filename;
 
-    @Override
-    public String getFilename() {
-        return filename;
-    }
+    @Autowired
+    private TaskFieldProvider fieldProvider;
 
 }

@@ -7,21 +7,12 @@ import com.sciforma.psnext.api.Resource;
 import com.sciforma.psnext.api.StringDatedData;
 import com.sciforma.psnext.api.Timesheet;
 import com.sciforma.psnext.api.TimesheetAssignment;
-import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
-import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
-import fr.sciforma.apietnic.business.extractor.DateExtractor;
-import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
-import fr.sciforma.apietnic.business.extractor.DecimalNoPrecisionExtractor;
-import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
-import fr.sciforma.apietnic.business.extractor.EffortExtractor;
-import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
-import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
-import fr.sciforma.apietnic.business.extractor.ListExtractor;
-import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
-import fr.sciforma.apietnic.business.extractor.StringExtractor;
+import fr.sciforma.apietnic.business.csv.TimesheetCsvHelper;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
+import fr.sciforma.apietnic.business.provider.TimesheetFieldProvider;
 import fr.sciforma.apietnic.service.SciformaService;
+import lombok.Getter;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,35 +27,17 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 @Component
+@Getter
 public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
 
-    public static final String ACTUAL_EFFORT = "Actual Effort";
     @Autowired
-    private StringExtractor<TimesheetAssignment> stringExtractor;
+    private TimesheetFieldProvider fieldProvider;
     @Autowired
-    private DecimalExtractor<TimesheetAssignment> decimalExtractor;
-    @Autowired
-    private DecimalNoPrecisionExtractor<TimesheetAssignment> decimalNoPrecisionExtractor;
-    @Autowired
-    private BooleanExtractor<TimesheetAssignment> booleanExtractor;
-    @Autowired
-    private DateExtractor<TimesheetAssignment> dateExtractor;
-    @Autowired
-    private IntegerExtractor<TimesheetAssignment> integerExtractor;
-    @Autowired
-    private ListExtractor<TimesheetAssignment> listExtractor;
-    @Autowired
-    private CalendarExtractor<TimesheetAssignment> calendarExtractor;
-    @Autowired
-    private EffortExtractor<TimesheetAssignment> effortExtractor;
-    @Autowired
-    private DoubleDatedExtractor<TimesheetAssignment> doubleDatedExtractor;
-    @Autowired
-    private StringDatedExtractor<TimesheetAssignment> stringDatedExtractor;
-    @Autowired
-    private HierarchicalExtractor<TimesheetAssignment> hierarchicalExtractor;
+    private TimesheetCsvHelper csvHelper;
 
-    protected void process(SciformaService sciformaService, Resource resource) {
+    public static final String ACTUAL_EFFORT = "Actual Effort";
+
+    public void process(SciformaService sciformaService, Resource resource) {
 
         Date startOfYear = Date.from(LocalDate.now()
                 .withMonth(1)
@@ -125,7 +98,7 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
             header.put(headerItem, null);
         }
 
-        for (SciformaField sciformaField : getFieldsToExtract()) {
+        for (SciformaField sciformaField : fieldProvider.getFields()) {
 
             if (sciformaField.getType().equals(FieldType.EFFORT)) {
 
@@ -194,66 +167,6 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
             return Optional.empty();
         }
 
-    }
-
-    @Override
-    public StringExtractor<TimesheetAssignment> getStringExtractor() {
-        return stringExtractor;
-    }
-
-    @Override
-    public DecimalExtractor<TimesheetAssignment> getDecimalExtractor() {
-        return decimalExtractor;
-    }
-
-    @Override
-    public DecimalNoPrecisionExtractor<TimesheetAssignment> getDecimalNoPrecisionExtractor() {
-        return decimalNoPrecisionExtractor;
-    }
-
-    @Override
-    public BooleanExtractor<TimesheetAssignment> getBooleanExtractor() {
-        return booleanExtractor;
-    }
-
-    @Override
-    public DateExtractor<TimesheetAssignment> getDateExtractor() {
-        return dateExtractor;
-    }
-
-    @Override
-    public IntegerExtractor<TimesheetAssignment> getIntegerExtractor() {
-        return integerExtractor;
-    }
-
-    @Override
-    public ListExtractor<TimesheetAssignment> getListExtractor() {
-        return listExtractor;
-    }
-
-    @Override
-    public CalendarExtractor<TimesheetAssignment> getCalendarExtractor() {
-        return calendarExtractor;
-    }
-
-    @Override
-    public EffortExtractor<TimesheetAssignment> getEffortExtractor() {
-        return effortExtractor;
-    }
-
-    @Override
-    public DoubleDatedExtractor<TimesheetAssignment> getDoubleDatedExtractor() {
-        return doubleDatedExtractor;
-    }
-
-    @Override
-    public StringDatedExtractor<TimesheetAssignment> getStringDatedExtractor() {
-        return stringDatedExtractor;
-    }
-
-    @Override
-    public HierarchicalExtractor<TimesheetAssignment> getHierarchicalExtractor() {
-        return hierarchicalExtractor;
     }
 
 }

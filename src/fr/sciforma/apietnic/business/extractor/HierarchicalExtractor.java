@@ -9,17 +9,17 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
-public class HierarchicalExtractor<T extends FieldAccessor> implements Extractor<T, String> {
+public class HierarchicalExtractor implements Extractor<String> {
 
     @Override
-    public Optional<String> extractAsString(T fieldAccessor, String fieldName) {
+    public Optional<String> extractAsString(FieldAccessor fieldAccessor, String fieldName) {
 
         return Optional.of(fieldAccessor.toString());
 
     }
 
     @Override
-    public Optional<String> extract(T fieldAccessor, String fieldName) {
+    public Optional<String> extract(FieldAccessor fieldAccessor, String fieldName) {
         return extractAsString(fieldAccessor, fieldName);
     }
 

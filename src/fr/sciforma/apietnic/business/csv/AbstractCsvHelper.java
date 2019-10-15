@@ -3,7 +3,6 @@ package fr.sciforma.apietnic.business.csv;
 import fr.sciforma.apietnic.business.model.SciformaField;
 import fr.sciforma.apietnic.business.provider.FieldProvider;
 import org.pmw.tinylog.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.PostConstruct;
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-public abstract class AbstractCsvHelper<T> implements CsvHelper<T> {
+public abstract class AbstractCsvHelper implements CsvHelper {
 
     String START_HEADER = "**Start**";
     String FINISH_HEADER = "**Finish**";
@@ -26,9 +25,6 @@ public abstract class AbstractCsvHelper<T> implements CsvHelper<T> {
     protected String delimiter;
     @Value("${csv.path}")
     protected String path;
-
-    @Autowired
-    FieldProvider<T> fieldProvider;
 
     private List<String> lines;
 
@@ -48,7 +44,7 @@ public abstract class AbstractCsvHelper<T> implements CsvHelper<T> {
     protected List<String> getHeader() {
         List<String> headerAsList = new ArrayList<>();
 
-        for (SciformaField sciformaField : fieldProvider.getFields()) {
+        for (SciformaField sciformaField : getFieldProvider().getFields()) {
             headerAsList.add(sciformaField.getName());
         }
 
@@ -104,5 +100,7 @@ public abstract class AbstractCsvHelper<T> implements CsvHelper<T> {
             Logger.error(e, "Failed to create file with path " + filePath);
         }
     }
+
+    public abstract FieldProvider getFieldProvider();
 
 }

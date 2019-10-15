@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
-public class BooleanExtractor<T extends FieldAccessor> implements Extractor<T, Boolean> {
+public class BooleanExtractor implements Extractor<Boolean> {
 
     @Override
-    public Optional<String> extractAsString(T fieldAccessor, String fieldName) {
+    public Optional<String> extractAsString(FieldAccessor fieldAccessor, String fieldName) {
 
         try {
 
@@ -25,7 +25,7 @@ public class BooleanExtractor<T extends FieldAccessor> implements Extractor<T, B
     }
 
     @Override
-    public Optional<Boolean> extract(T fieldAccessor, String fieldName) {
+    public Optional<Boolean> extract(FieldAccessor fieldAccessor, String fieldName) {
         try {
 
             return Optional.of(fieldAccessor.getBooleanField(fieldName));

@@ -1,7 +1,9 @@
 package fr.sciforma.apietnic.business.csv;
 
-import com.sciforma.psnext.api.TimesheetAssignment;
 import fr.sciforma.apietnic.business.model.SciformaField;
+import fr.sciforma.apietnic.business.provider.TimesheetFieldProvider;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -9,15 +11,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class TimesheetCsvHelper extends AbstractCsvHelper<TimesheetAssignment> {
+@Getter
+public class TimesheetCsvHelper extends AbstractCsvHelper {
 
     @Value("${filename.timesheets}")
     private String filename;
 
-    @Override
-    public String getFilename() {
-        return filename;
-    }
+    @Autowired
+    private TimesheetFieldProvider fieldProvider;
 
     @Override
     protected List<String> getHeader() {

@@ -11,13 +11,13 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 @Component
-public class ListExtractor<T extends FieldAccessor> implements Extractor<T, List> {
+public class ListExtractor implements Extractor<List> {
 
     @Value("${multivalue.delimiter}")
     protected String delimiter;
 
     @Override
-    public Optional<String> extractAsString(T fieldAccessor, String fieldName) {
+    public Optional<String> extractAsString(FieldAccessor fieldAccessor, String fieldName) {
 
         try {
             List listField = fieldAccessor.getListField(fieldName);
@@ -40,7 +40,7 @@ public class ListExtractor<T extends FieldAccessor> implements Extractor<T, List
     }
 
     @Override
-    public Optional<List> extract(T fieldAccessor, String fieldName) {
+    public Optional<List> extract(FieldAccessor fieldAccessor, String fieldName) {
 
         try {
 

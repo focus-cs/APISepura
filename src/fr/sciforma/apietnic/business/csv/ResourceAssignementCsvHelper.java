@@ -1,7 +1,9 @@
 package fr.sciforma.apietnic.business.csv;
 
-import com.sciforma.psnext.api.ResAssignment;
 import fr.sciforma.apietnic.business.model.SciformaField;
+import fr.sciforma.apietnic.business.provider.ResourceFieldProvider;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -9,15 +11,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class ResourceAssignementCsvHelper extends AbstractCsvHelper<ResAssignment> {
+@Getter
+public class ResourceAssignementCsvHelper extends AbstractCsvHelper {
 
     @Value("${filename.resAssignements}")
     private String filename;
 
-    @Override
-    public String getFilename() {
-        return filename;
-    }
+    @Autowired
+    private ResourceFieldProvider fieldProvider;
 
     @Override
     protected List<String> getHeader() {

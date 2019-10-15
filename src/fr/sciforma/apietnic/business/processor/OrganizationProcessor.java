@@ -1,53 +1,66 @@
 package fr.sciforma.apietnic.business.processor;
 
 import com.sciforma.psnext.api.Organization;
-import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
-import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
-import fr.sciforma.apietnic.business.extractor.DateExtractor;
-import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
-import fr.sciforma.apietnic.business.extractor.DecimalNoPrecisionExtractor;
-import fr.sciforma.apietnic.business.extractor.DoubleDatedExtractor;
-import fr.sciforma.apietnic.business.extractor.EffortExtractor;
-import fr.sciforma.apietnic.business.extractor.HierarchicalExtractor;
-import fr.sciforma.apietnic.business.extractor.IntegerExtractor;
-import fr.sciforma.apietnic.business.extractor.ListExtractor;
-import fr.sciforma.apietnic.business.extractor.StringDatedExtractor;
-import fr.sciforma.apietnic.business.extractor.StringExtractor;
-import fr.sciforma.apietnic.business.model.OrganizationBo;
+import fr.sciforma.apietnic.business.csv.OrganizationCsvHelper;
+import fr.sciforma.apietnic.business.provider.OrganizationFieldProvider;
 import fr.sciforma.apietnic.service.SciformaService;
+import lombok.Getter;
+import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
-public class OrganizationProcessor extends AbstractSystemDataProcessor<Organization, OrganizationBo> {
+@Getter
+public class OrganizationProcessor extends AbstractSystemDataProcessor<Organization> {
 
     @Autowired
-    private StringExtractor<Organization> stringExtractor;
+    private OrganizationFieldProvider fieldProvider;
     @Autowired
-    private DecimalExtractor<Organization> decimalExtractor;
-    @Autowired
-    private DecimalNoPrecisionExtractor<Organization> decimalNoPrecisionExtractor;
-    @Autowired
-    private BooleanExtractor<Organization> booleanExtractor;
-    @Autowired
-    private DateExtractor<Organization> dateExtractor;
-    @Autowired
-    private IntegerExtractor<Organization> integerExtractor;
-    @Autowired
-    private ListExtractor<Organization> listExtractor;
-    @Autowired
-    private CalendarExtractor<Organization> calendarExtractor;
-    @Autowired
-    private EffortExtractor<Organization> effortExtractor;
-    @Autowired
-    private DoubleDatedExtractor<Organization> doubleDatedExtractor;
-    @Autowired
-    private StringDatedExtractor<Organization> stringDatedExtractor;
-    @Autowired
-    private HierarchicalExtractor<Organization> hierarchicalExtractor;
+    private OrganizationCsvHelper csvHelper;
+
+    private Map<String, Integer> organizationByName;
+
+    public Map<String, Integer> getOrganizationByName(SciformaService sciformaService) {
+
+        Logger.info("Processing file " + getCsvHelper().getFilename());
+
+        organizationByName = new HashMap<>();
+
+        Optional<Organization> fieldAccessors = getFieldAccessors(sciformaService);
+
+        fieldAccessors.ifPresent(this::parse);
+
+        getCsvHelper().flush();
+
+        Logger.info("File " + getCsvHelper().getFilename() + " has been processed successfully");
+
+        return organizationByName;
+
+    }
+
+    private void parse(Organization root) {
+
+        String csvLine = buildCsvLine(root);
+        getCsvHelper().addLine(csvLine);
+
+        List<Organization> children = getChildren(root);
+
+        if (children != null && !children.isEmpty()) {
+
+            for (Organization child : children) {
+
+                parse(child);
+
+            }
+
+        }
+
+    }
 
     @Override
     protected Optional<Organization> getFieldAccessors(SciformaService sciformaService) {
@@ -59,68 +72,4 @@ public class OrganizationProcessor extends AbstractSystemDataProcessor<Organizat
         return fieldAccessor.getChildren();
     }
 
-    @Override
-    protected OrganizationBo buildBusinessObject(List<String> fields) {
-        return null;
-    }
-
-    @Override
-    public StringExtractor<Organization> getStringExtractor() {
-        return stringExtractor;
-    }
-
-    @Override
-    public DecimalExtractor<Organization> getDecimalExtractor() {
-        return decimalExtractor;
-    }
-
-    @Override
-    public DecimalNoPrecisionExtractor<Organization> getDecimalNoPrecisionExtractor() {
-        return decimalNoPrecisionExtractor;
-    }
-
-    @Override
-    public BooleanExtractor<Organization> getBooleanExtractor() {
-        return booleanExtractor;
-    }
-
-    @Override
-    public DateExtractor<Organization> getDateExtractor() {
-        return dateExtractor;
-    }
-
-    @Override
-    public IntegerExtractor<Organization> getIntegerExtractor() {
-        return integerExtractor;
-    }
-
-    @Override
-    public ListExtractor<Organization> getListExtractor() {
-        return listExtractor;
-    }
-
-    @Override
-    public CalendarExtractor<Organization> getCalendarExtractor() {
-        return calendarExtractor;
-    }
-
-    @Override
-    public EffortExtractor<Organization> getEffortExtractor() {
-        return effortExtractor;
-    }
-
-    @Override
-    public DoubleDatedExtractor<Organization> getDoubleDatedExtractor() {
-        return doubleDatedExtractor;
-    }
-
-    @Override
-    public StringDatedExtractor<Organization> getStringDatedExtractor() {
-        return stringDatedExtractor;
-    }
-
-    @Override
-    public HierarchicalExtractor<Organization> getHierarchicalExtractor() {
-        return hierarchicalExtractor;
-    }
 }

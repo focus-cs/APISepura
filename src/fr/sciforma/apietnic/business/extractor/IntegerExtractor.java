@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
-public class IntegerExtractor<T extends FieldAccessor> implements Extractor<T, Integer> {
+public class IntegerExtractor implements Extractor<Integer> {
 
     @Override
-    public Optional<String> extractAsString(T fieldAccessor, String fieldName) {
+    public Optional<String> extractAsString(FieldAccessor fieldAccessor, String fieldName) {
 
         try {
 
@@ -26,7 +26,7 @@ public class IntegerExtractor<T extends FieldAccessor> implements Extractor<T, I
     }
 
     @Override
-    public Optional<Integer> extract(T fieldAccessor, String fieldName) {
+    public Optional<Integer> extract(FieldAccessor fieldAccessor, String fieldName) {
 
         try {
 

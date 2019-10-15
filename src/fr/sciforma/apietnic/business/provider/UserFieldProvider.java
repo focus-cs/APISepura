@@ -1,6 +1,5 @@
 package fr.sciforma.apietnic.business.provider;
 
-import com.sciforma.psnext.api.User;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
 import lombok.Getter;
@@ -12,7 +11,7 @@ import java.util.List;
 
 @Component
 @Getter
-public class UserFieldProvider implements FieldProvider<User> {
+public class UserFieldProvider implements FieldProvider {
 
     private List<SciformaField> fields;
 
@@ -22,7 +21,7 @@ public class UserFieldProvider implements FieldProvider<User> {
         fields.add(SciformaField.builder().name("Email Address 1").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("First Name").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("ID").type(FieldType.STRING).build());
-        fields.add(SciformaField.builder().name("Internal ID").type(FieldType.DECIMAL).build());
+        fields.add(SciformaField.builder().name("Internal ID").type(FieldType.DECIMAL_NO_PRECISION).build());
         fields.add(SciformaField.builder().name("Last Name").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Login ID").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Middle Name").type(FieldType.STRING).build());

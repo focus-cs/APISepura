@@ -9,12 +9,12 @@ import java.text.DecimalFormat;
 import java.util.Optional;
 
 @Component
-public class DecimalExtractor<T extends FieldAccessor> implements Extractor<T, Double> {
+public class DecimalExtractor implements Extractor<Double> {
 
     private DecimalFormat decimalFormat = new DecimalFormat("#0.00");
 
     @Override
-    public Optional<String> extractAsString(T fieldAccessor, String fieldName) {
+    public Optional<String> extractAsString(FieldAccessor fieldAccessor, String fieldName) {
 
         try {
 
@@ -28,7 +28,7 @@ public class DecimalExtractor<T extends FieldAccessor> implements Extractor<T, D
     }
 
     @Override
-    public Optional<Double> extract(T fieldAccessor, String fieldName) {
+    public Optional<Double> extract(FieldAccessor fieldAccessor, String fieldName) {
 
         try {
 

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
-public class StringExtractor<T extends FieldAccessor> implements Extractor<T, String> {
+public class StringExtractor implements Extractor<String> {
 
     @Value("${csv.delimiter}")
     protected String csvDelimiter;
@@ -17,7 +17,7 @@ public class StringExtractor<T extends FieldAccessor> implements Extractor<T, St
     protected String csvDelimiterReplaceWith;
 
     @Override
-    public Optional<String> extractAsString(T fieldAccessor, String fieldName) {
+    public Optional<String> extractAsString(FieldAccessor fieldAccessor, String fieldName) {
 
         try {
 
@@ -33,7 +33,7 @@ public class StringExtractor<T extends FieldAccessor> implements Extractor<T, St
     }
 
     @Override
-    public Optional<String> extract(T fieldAccessor, String fieldName) {
+    public Optional<String> extract(FieldAccessor fieldAccessor, String fieldName) {
         return extractAsString(fieldAccessor, fieldName);
     }
 
