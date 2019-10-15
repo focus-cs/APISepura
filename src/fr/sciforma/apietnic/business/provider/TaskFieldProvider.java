@@ -72,7 +72,6 @@ public class TaskFieldProvider implements FieldProvider<Task> {
         fields.add(SciformaField.builder().name("Name").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Required Date").type(FieldType.DATE).build());
         fields.add(SciformaField.builder().name("Required Labor").type(FieldType.DECIMAL).build());
-        fields.add(SciformaField.builder().name("Resource Names").type(FieldType.LIST).build());
         fields.add(SciformaField.builder().name("Ratio budget").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("Start").type(FieldType.DATE).build());
         fields.add(SciformaField.builder().name("Start Delay").type(FieldType.DURATION).build());
