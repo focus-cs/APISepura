@@ -1,6 +1,7 @@
 package fr.sciforma.apietnic.business.csv;
 
 import fr.sciforma.apietnic.business.model.SciformaField;
+import fr.sciforma.apietnic.business.provider.ResourceAssignementFieldProvider;
 import fr.sciforma.apietnic.business.provider.ResourceFieldProvider;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ public class ResourceAssignementCsvHelper extends AbstractCsvHelper {
     private String filename;
 
     @Autowired
-    private ResourceFieldProvider fieldProvider;
+    private ResourceAssignementFieldProvider fieldProvider;
 
     @Override
     protected List<String> getHeader() {

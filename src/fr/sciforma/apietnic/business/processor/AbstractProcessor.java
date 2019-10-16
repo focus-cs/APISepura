@@ -4,6 +4,7 @@ import com.sciforma.psnext.api.DatedData;
 import com.sciforma.psnext.api.DoubleDatedData;
 import com.sciforma.psnext.api.FieldAccessor;
 import com.sciforma.psnext.api.PSException;
+import com.sciforma.psnext.api.StringDatedData;
 import fr.sciforma.apietnic.business.csv.CsvHelper;
 import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
 import fr.sciforma.apietnic.business.extractor.DateExtractor;
@@ -37,10 +38,11 @@ import java.util.StringJoiner;
 
 public abstract class AbstractProcessor<T extends FieldAccessor> {
 
-    protected static final String START_HEADER = "**Start**";
-    protected static final String FINISH_HEADER = "**Finish**";
+    private static final String START_HEADER = "**Start**";
+    private static final String FINISH_HEADER = "**Finish**";
+    private static final String ACTUAL_EFFORT = "Actual Effort";
 
-    protected SimpleDateFormat sdf;
+    private SimpleDateFormat sdf;
 
     @Value("${csv.delimiter}")
     protected String csvDelimiter;
@@ -129,8 +131,23 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
 
                 if (!datedData.isEmpty()) {
 
-                    header.put(START_HEADER, sdf.format(datedData.get(0).getStart()));
-                    header.put(FINISH_HEADER, sdf.format(datedData.get(0).getFinish()));
+                    header.putIfAbsent(START_HEADER, sdf.format(datedData.get(0).getStart()));
+                    header.putIfAbsent(FINISH_HEADER, sdf.format(datedData.get(0).getFinish()));
+                    header.put(sciformaField.getName(), String.valueOf(datedData.get(0).getData()));
+
+                }
+
+            } else if (sciformaField.getType().equals(FieldType.STRING_DATED)) {
+
+                Date from = Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+                Date to = Date.from(localDate.plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+
+                List<StringDatedData> datedData = distributedValue.getDatedData(sciformaField.getName(), DatedData.DAY, from, to);
+
+                if (!datedData.isEmpty()) {
+
+                    header.putIfAbsent(START_HEADER, sdf.format(datedData.get(0).getStart()));
+                    header.putIfAbsent(FINISH_HEADER, sdf.format(datedData.get(0).getFinish()));
                     header.put(sciformaField.getName(), String.valueOf(datedData.get(0).getData()));
 
                 }
@@ -142,25 +159,31 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
             }
         }
 
-        if (header.get(START_HEADER) != null && !header.get(START_HEADER).isEmpty()) {
+        if (header.containsKey(ACTUAL_EFFORT) && header.get(ACTUAL_EFFORT) != null && Double.valueOf(header.get(ACTUAL_EFFORT)) > 0) {
 
-            StringJoiner csvLine = new StringJoiner(csvDelimiter);
+            if (header.get(START_HEADER) != null && !header.get(START_HEADER).isEmpty()) {
 
-            for (String headerItem : getCsvHelper().getHeaderAsList()) {
+                StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
-                if (header.containsKey(headerItem)) {
+                for (String headerItem : getCsvHelper().getHeaderAsList()) {
 
-                    if (header.get(headerItem) != null) {
-                        csvLine.add(header.get(headerItem));
-                    } else {
-                        csvLine.add("");
+                    if (header.containsKey(headerItem)) {
+
+                        if (header.get(headerItem) != null) {
+                            csvLine.add(header.get(headerItem));
+                        } else {
+                            csvLine.add("");
+                        }
+
                     }
 
                 }
 
-            }
+                return Optional.of(csvLine.toString());
 
-            return Optional.of(csvLine.toString());
+            } else {
+                return Optional.empty();
+            }
 
         } else {
             return Optional.empty();

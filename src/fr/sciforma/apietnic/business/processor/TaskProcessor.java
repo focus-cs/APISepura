@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -43,27 +44,74 @@ public class TaskProcessor extends AbstractProcessor<Task> {
 
             Logger.info("Processing tasks for project " + projectName);
 
+            project.open(true);
             TaskOutlineList tasks = project.getTaskOutlineList();
 
-            Iterator taskTterator = tasks.iterator();
-            while (taskTterator.hasNext()) {
-                Task task = (Task) taskTterator.next();
+            Map<Integer, Task> taskMap = new HashMap<>();
 
-                parseTask(task.getSuccessorLinksList(), usersByName, project);
-                parseTask(task.getPredecessorLinksList(), usersByName, project);
+            for (Object taskItem : tasks) {
+                Task task = (Task) taskItem;
+
+                Optional<Integer> taskNumber = (Optional<Integer>) extractorMap.get(FieldType.INTEGER).extract(task, "#");
+                taskNumber.ifPresent(integer -> taskMap.putIfAbsent(integer, task));
+
+//                parseTask(task, usersByName, project);
+
+                for (int i = 0; i < tasks.getChildCount(task); i++) {
+
+                    Task childTask = tasks.getChild(task, i);
+
+                    taskNumber = (Optional<Integer>) extractorMap.get(FieldType.INTEGER).extract(childTask, "#");
+                    taskNumber.ifPresent(integer -> taskMap.putIfAbsent(integer, childTask));
+
+//                    parseTask(tasks.getChild(task, i), usersByName, project);
+
+                }
+//                for (Object o : task.getSuccessorLinksList()) {
+//                    TaskLink taskLink = (TaskLink) o;
+//                    parseTask(taskLink.getTask(), usersByName, project);
+//                }
+//
+//                for (Object o : task.getPredecessorLinksList()) {
+//                    TaskLink taskLink = (TaskLink) o;
+//                    parseTask(taskLink.getTask(), usersByName, project);
+//                }
+
             }
+
+            for (Map.Entry<Integer, Task> entry : taskMap.entrySet()) {
+                parseTask(entry.getValue(), usersByName, project);
+            }
+
 
             Logger.info("Tasks for project " + projectName + " have been processed successfully");
 
         } catch (PSException e) {
             Logger.error(e, "Failed to retrieve task outline for project " + projectName);
         } finally {
+            try {
+                project.close();
+            } catch (PSException e) {
+                Logger.error(e, "Failed to close project " + projectName);
+            }
             csvHelper.flush();
         }
 
     }
 
-    private void parseTask(List<Task> tasks, Map<String, String> usersByName, Project project) {
+    private void parseTask(Task task, Map<String, String> usersByName, Project project) {
+
+        csvHelper.addLine(buildCsvLine(task, usersByName, project));
+
+        Optional<Date> taskStart = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(task, "Start");
+        Optional<Date> taskFinish = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(task, "Finish");
+
+        if (taskStart.isPresent() && taskFinish.isPresent()) {
+            resourceAssignementProcessor.process(task, taskStart.get(), taskFinish.get());
+        }
+    }
+
+    private void parseTasks(List<Task> tasks, Map<String, String> usersByName, Project project) {
 
         Iterator taskIterator = tasks.iterator();
 

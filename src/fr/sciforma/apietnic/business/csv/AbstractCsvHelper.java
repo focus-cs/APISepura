@@ -16,8 +16,8 @@ import java.util.StringJoiner;
 
 public abstract class AbstractCsvHelper implements CsvHelper {
 
-    static final String START_HEADER = "**Start**";
-    static final String FINISH_HEADER = "**Finish**";
+    final String START_HEADER = "**Start**";
+    final String FINISH_HEADER = "**Finish**";
 
     private static final int BATCH_SIZE = 200;
 

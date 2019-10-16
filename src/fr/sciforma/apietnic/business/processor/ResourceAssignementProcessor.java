@@ -3,7 +3,7 @@ package fr.sciforma.apietnic.business.processor;
 import com.sciforma.psnext.api.PSException;
 import com.sciforma.psnext.api.ResAssignment;
 import com.sciforma.psnext.api.Task;
-import fr.sciforma.apietnic.business.csv.ResourceCsvHelper;
+import fr.sciforma.apietnic.business.csv.ResourceAssignementCsvHelper;
 import fr.sciforma.apietnic.business.provider.ResourceAssignementFieldProvider;
 import lombok.Getter;
 import org.pmw.tinylog.Logger;
@@ -22,7 +22,7 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
     @Autowired
     private ResourceAssignementFieldProvider fieldProvider;
     @Autowired
-    private ResourceCsvHelper csvHelper;
+    private ResourceAssignementCsvHelper csvHelper;
 
     protected void process(Task task, Date start, Date end) {
 
