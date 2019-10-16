@@ -18,7 +18,6 @@ public class CalendarExtractor implements Extractor<Calendar> {
 
             Object value = fieldAccessor.getValue(fieldName);
             Logger.info(value.toString());
-//            return Optional.of(fieldAccessor.get(fieldName).replaceAll("\\r\\n|\\r|\\n", " "));
 
         } catch (PSException e) {
             Logger.error(e, "Failed to retrieve string value from field " + fieldName);

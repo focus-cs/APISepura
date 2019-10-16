@@ -2,7 +2,6 @@ package fr.sciforma.apietnic.business.processor;
 
 import com.sciforma.psnext.api.FieldAccessor;
 import fr.sciforma.apietnic.service.SciformaService;
-import org.pmw.tinylog.Logger;
 
 import java.util.List;
 
@@ -12,20 +11,5 @@ import java.util.List;
 public abstract class AbstractFieldAccessorProcessor<T extends FieldAccessor> extends AbstractProcessor<T> {
 
     protected abstract List<T> getFieldAccessors(SciformaService sciformaService);
-
-    public void process(SciformaService sciformaService) {
-
-        Logger.info("Processing file " + getCsvHelper().getFilename());
-
-        for (T fieldAccessor : getFieldAccessors(sciformaService)) {
-
-            getCsvHelper().addLine(buildCsvLine(fieldAccessor));
-
-        }
-
-        getCsvHelper().flush();
-
-        Logger.info("File " + getCsvHelper().getFilename() + " has been processed successfully");
-    }
 
 }

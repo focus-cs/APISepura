@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Component
 @Getter
@@ -27,18 +26,9 @@ public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> 
 
         Map<String, Resource> resourcesById = new HashMap<>();
 
-        int cpt = 0;
-
         for (Resource resource : getFieldAccessors(sciformaService)) {
 
-            Optional<String> internalId = extractorMap.get(FieldType.DECIMAL_NO_PRECISION).extractAsString(resource, "Internal ID");
-
-            internalId.ifPresent(iid -> resourcesById.putIfAbsent(iid, resource));
-
-//            cpt++;
-//            if (cpt > 5) {
-//                break;
-//            }
+            extractorMap.get(FieldType.DECIMAL_NO_PRECISION).extractAsString(resource, "Internal ID").ifPresent(iid -> resourcesById.putIfAbsent(iid, resource));
 
         }
 

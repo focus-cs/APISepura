@@ -40,8 +40,6 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
         Map<Double, Project> projectsById = new HashMap<>();
 
-        int cpt = 0;
-
         for (Project project : projectList) {
 
             try {
@@ -67,11 +65,6 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
                 }
 
             }
-
-            if (cpt > 10) {
-                break;
-            }
-            cpt++;
 
         }
 

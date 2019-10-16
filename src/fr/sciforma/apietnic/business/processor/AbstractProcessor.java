@@ -4,11 +4,8 @@ import com.sciforma.psnext.api.DatedData;
 import com.sciforma.psnext.api.DoubleDatedData;
 import com.sciforma.psnext.api.FieldAccessor;
 import com.sciforma.psnext.api.PSException;
-import com.sciforma.psnext.api.PortfolioFolder;
-import com.sciforma.psnext.api.User;
 import fr.sciforma.apietnic.business.csv.CsvHelper;
 import fr.sciforma.apietnic.business.extractor.BooleanExtractor;
-import fr.sciforma.apietnic.business.extractor.CalendarExtractor;
 import fr.sciforma.apietnic.business.extractor.DateExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalExtractor;
 import fr.sciforma.apietnic.business.extractor.DecimalNoPrecisionExtractor;
@@ -30,7 +27,6 @@ import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -63,8 +59,6 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
     private IntegerExtractor integerExtractor;
     @Autowired
     private ListExtractor listExtractor;
-    @Autowired
-    private CalendarExtractor calendarExtractor;
     @Autowired
     private EffortExtractor effortExtractor;
     @Autowired
@@ -115,12 +109,6 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
 
         }
         return csvLine.toString();
-    }
-
-    List<String> splitCsvLine(String csvLine) {
-
-        return Arrays.asList(csvLine.split(csvDelimiter));
-
     }
 
     Optional<String> buildTimeDistributedCsvLine(T distributedValue, LocalDate localDate) throws PSException {

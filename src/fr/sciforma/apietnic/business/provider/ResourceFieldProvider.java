@@ -19,8 +19,6 @@ public class ResourceFieldProvider implements FieldProvider {
     public void init() {
         fields = new ArrayList<>();
         fields.add(SciformaField.builder().name("End Date").type(FieldType.DATE).build());
-//        fields.add(SciformaField.builder().name("ID").type(FieldType.STRING).build());
-//        fields.add(SciformaField.builder().name("Internal ID").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("Job Classification").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Métier direct").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Start Date").type(FieldType.DATE).build());

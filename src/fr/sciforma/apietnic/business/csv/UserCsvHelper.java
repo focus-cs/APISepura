@@ -1,7 +1,6 @@
 package fr.sciforma.apietnic.business.csv;
 
 import fr.sciforma.apietnic.business.model.SciformaField;
-import fr.sciforma.apietnic.business.provider.FieldProvider;
 import fr.sciforma.apietnic.business.provider.ResourceFieldProvider;
 import fr.sciforma.apietnic.business.provider.UserFieldProvider;
 import lombok.Getter;

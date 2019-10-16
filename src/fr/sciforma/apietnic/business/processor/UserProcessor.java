@@ -45,18 +45,11 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
 
         StringJoiner csvLine;
 
-        int cpt = 0;
-
         for (User fieldAccessor : getFieldAccessors(sciformaService)) {
 
             Optional<String> internalId = extractorMap.get(FieldType.DECIMAL_NO_PRECISION).extractAsString(fieldAccessor, "Internal ID");
 
             internalId.ifPresent(iid -> usersById.putIfAbsent(iid, fieldAccessor));
-
-//            cpt++;
-//            if (cpt > 5) {
-//                break;
-//            }
 
         }
 
