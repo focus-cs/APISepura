@@ -2,6 +2,7 @@ package fr.sciforma.apietnic.business.processor;
 
 import com.sciforma.psnext.api.Organization;
 import fr.sciforma.apietnic.business.csv.OrganizationCsvHelper;
+import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.provider.OrganizationFieldProvider;
 import fr.sciforma.apietnic.service.SciformaService;
 import lombok.Getter;
@@ -23,9 +24,9 @@ public class OrganizationProcessor extends AbstractSystemDataProcessor<Organizat
     @Autowired
     private OrganizationCsvHelper csvHelper;
 
-    private Map<String, Integer> organizationByName;
+    private Map<String, String> organizationByName;
 
-    public Map<String, Integer> getOrganizationByName(SciformaService sciformaService) {
+    public Map<String, String> getOrganizationByName(SciformaService sciformaService) {
 
         Logger.info("Processing file " + getCsvHelper().getFilename());
 
@@ -47,6 +48,9 @@ public class OrganizationProcessor extends AbstractSystemDataProcessor<Organizat
 
         String csvLine = buildCsvLine(root);
         getCsvHelper().addLine(csvLine);
+
+        Optional<String> organizationIID = extractorMap.get(FieldType.DECIMAL_NO_PRECISION).extractAsString(root, "Internal ID");
+        organizationIID.ifPresent(s -> organizationByName.putIfAbsent(root.toString(), s));
 
         List<Organization> children = getChildren(root);
 

@@ -1,12 +1,10 @@
 package fr.sciforma.apietnic.business.processor;
 
 import com.sciforma.psnext.api.FieldAccessor;
-import com.sciforma.psnext.api.User;
 import fr.sciforma.apietnic.service.SciformaService;
 import org.pmw.tinylog.Logger;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -16,11 +14,8 @@ public abstract class AbstractSystemDataProcessor<T extends FieldAccessor> exten
 
     protected abstract Optional<T> getFieldAccessors(SciformaService sciformaService);
     protected abstract List<T> getChildren(T fieldAccessor);
-//    protected abstract B buildBusinessObject(List<String> fields);
 
-//    private Map<Integer, B> boByInternalId = new HashMap<>();
-
-    public void process(SciformaService sciformaService, Map<String, Integer> usersByName) {
+    public void process(SciformaService sciformaService) {
 
         Logger.info("Processing file " + getCsvHelper().getFilename());
 
@@ -32,16 +27,12 @@ public abstract class AbstractSystemDataProcessor<T extends FieldAccessor> exten
 
         Logger.info("File " + getCsvHelper().getFilename() + " has been processed successfully");
 
-//        return boByInternalId;
-
     }
 
     private void parse(T root) {
 
         String csvLine = buildCsvLine(root);
         getCsvHelper().addLine(csvLine);
-//        B businessObject = buildBusinessObject(splitCsvLine(csvLine));
-//        boByInternalId.putIfAbsent(businessObject.getInternalId(), businessObject);
 
         List<T> children = getChildren(root);
 

@@ -1,10 +1,12 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.PSException;
 import com.sciforma.psnext.api.Resource;
 import com.sciforma.psnext.api.Skill;
 import com.sciforma.psnext.api.User;
 import fr.sciforma.apietnic.business.csv.SkillUserCsvHelper;
+import fr.sciforma.apietnic.business.extractor.DecimalNoPrecisionExtractor;
+import fr.sciforma.apietnic.business.extractor.ListExtractor;
+import fr.sciforma.apietnic.business.extractor.StringExtractor;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 @Component
@@ -21,46 +24,48 @@ public class SkillUserProcessor {
     protected String csvDelimiter;
 
     @Autowired
+    private StringExtractor stringExtractor;
+    @Autowired
+    private DecimalNoPrecisionExtractor decimalNoPrecisionExtractor;
+    @Autowired
+    private ListExtractor listExtractor;
+
+    @Autowired
     SkillUserCsvHelper skillUserCsvHelper;
 
-    public void process(Map<String, Skill> skillsByName, Map<Double, User> usersById, Map<Double, Resource> resourcesById) {
+    public void process(Map<String, Skill> skillsByName, Map<String, User> usersById, Map<String, Resource> resourcesById) {
 
         Logger.info("Processing file " + skillUserCsvHelper.getFilename());
 
-        try {
+        for (Map.Entry<String, User> userEntry : usersById.entrySet()) {
 
-            for (Map.Entry<Double, User> userEntry : usersById.entrySet()) {
+            if (resourcesById.containsKey(userEntry.getKey())) {
 
-                if (resourcesById.containsKey(userEntry.getKey())) {
+                Optional<List> userSkills = listExtractor.extract(resourcesById.get(userEntry.getKey()), "Skills");
 
-                    List<String> userSkills = resourcesById.get(userEntry.getKey()).getListField("Skills");
+                if (userSkills.isPresent()) {
 
-                    if (userSkills != null) {
+                    List<String> userSkillList = userSkills.get();
 
-                        for (String userSkill : userSkills) {
+                    for (String userSkill : userSkillList) {
 
-                            if (skillsByName.containsKey(userSkill)) {
+                        if (skillsByName.containsKey(userSkill)) {
 
-                                StringJoiner csvLine = new StringJoiner(csvDelimiter);
-                                csvLine.add(String.valueOf(Double.valueOf(userEntry.getValue().getDoubleField("Internal ID")).intValue()));
-                                csvLine.add(userEntry.getValue().getStringField("Name"));
-                                csvLine.add(String.valueOf(Double.valueOf(skillsByName.get(userSkill).getDoubleField("Internal ID")).intValue()));
-                                csvLine.add(skillsByName.get(userSkill).toString());
+                            StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
-                                skillUserCsvHelper.addLine(csvLine.toString());
-                            }
+                            csvLine.add(decimalNoPrecisionExtractor.extractAsString(userEntry.getValue(), "Internal ID").orElse(""));
+                            csvLine.add(stringExtractor.extractAsString(userEntry.getValue(), "Name").orElse(""));
+                            csvLine.add(decimalNoPrecisionExtractor.extractAsString(skillsByName.get(userSkill), "Internal ID").orElse(""));
+                            csvLine.add(skillsByName.get(userSkill).toString());
 
+                            skillUserCsvHelper.addLine(csvLine.toString());
                         }
 
                     }
+
                 }
-
-
             }
 
-        } catch (PSException e) {
-
-            Logger.error(e);
 
         }
 

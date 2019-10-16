@@ -37,11 +37,11 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
     @Autowired
     SkillUserCsvHelper skillUSerCsvHelper;
 
-    public Map<Double, User> getUsersById(SciformaService sciformaService, Map<Double, Resource> resourcesById) {
+    public Map<String, User> getUsersById(SciformaService sciformaService, Map<String, Resource> resourcesById) {
 
         Logger.info("Processing file " + csvHelper.getFilename());
 
-        Map<Double, User> usersById = new HashMap<>();
+        Map<String, User> usersById = new HashMap<>();
 
         StringJoiner csvLine;
 
@@ -49,9 +49,9 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
 
         for (User fieldAccessor : getFieldAccessors(sciformaService)) {
 
-            Optional<Double> internalId = (Optional<Double>) extractorMap.get(FieldType.DECIMAL).extract(fieldAccessor, "Internal ID");
+            Optional<String> internalId = extractorMap.get(FieldType.DECIMAL_NO_PRECISION).extractAsString(fieldAccessor, "Internal ID");
 
-            internalId.ifPresent(aDouble -> usersById.putIfAbsent(aDouble, fieldAccessor));
+            internalId.ifPresent(iid -> usersById.putIfAbsent(iid, fieldAccessor));
 
 //            cpt++;
 //            if (cpt > 5) {
@@ -60,7 +60,7 @@ public class UserProcessor extends AbstractFieldAccessorProcessor<User> {
 
         }
 
-        for (Map.Entry<Double, User> entry : usersById.entrySet()) {
+        for (Map.Entry<String, User> entry : usersById.entrySet()) {
 
             csvLine = new StringJoiner(csvDelimiter);
             csvLine.add(buildCsvLine(entry.getValue()));

@@ -33,7 +33,7 @@ public class TaskProcessor extends AbstractProcessor<Task> {
     @Autowired
     private ResourceAssignementProcessor resourceAssignementProcessor;
 
-    public void process(Project project, Map<String, Integer> usersByName) {
+    public void process(Project project, Map<String, String> usersByName) {
 
         String projectName = null;
 
@@ -49,8 +49,8 @@ public class TaskProcessor extends AbstractProcessor<Task> {
             while (taskTterator.hasNext()) {
                 Task task = (Task) taskTterator.next();
 
-                parseTask(task.getSuccessorLinksList(), usersByName);
-                parseTask(task.getPredecessorLinksList(), usersByName);
+                parseTask(task.getSuccessorLinksList(), usersByName, project);
+                parseTask(task.getPredecessorLinksList(), usersByName, project);
             }
 
             Logger.info("Tasks for project " + projectName + " have been processed successfully");
@@ -63,7 +63,7 @@ public class TaskProcessor extends AbstractProcessor<Task> {
 
     }
 
-    private void parseTask(List<Task> tasks, Map<String, Integer> usersByName) {
+    private void parseTask(List<Task> tasks, Map<String, String> usersByName, Project project) {
 
         Iterator taskIterator = tasks.iterator();
 
@@ -77,7 +77,7 @@ public class TaskProcessor extends AbstractProcessor<Task> {
                 Optional<Date> taskStart = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(task, "Start");
                 Optional<Date> taskFinish = (Optional<Date>) extractorMap.get(FieldType.DATE).extract(task, "Finish");
 
-                csvHelper.addLine(buildCsvLine(task, usersByName));
+                csvHelper.addLine(buildCsvLine(task, usersByName, project));
 
                 if (taskStart.isPresent() && taskFinish.isPresent()) {
                     resourceAssignementProcessor.process(task, taskStart.get(), taskFinish.get());
@@ -91,7 +91,7 @@ public class TaskProcessor extends AbstractProcessor<Task> {
 
     }
 
-    String buildCsvLine(Task fieldAccessor, Map<String, Integer> usersByName) {
+    String buildCsvLine(Task fieldAccessor, Map<String, String> usersByName, Project project) {
         StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
         for (SciformaField sciformaField : getFieldProvider().getFields()) {
@@ -104,19 +104,19 @@ public class TaskProcessor extends AbstractProcessor<Task> {
 
                 if (value.isPresent() && usersByName.containsKey(value.get())) {
 
-                    value = Optional.of(String.valueOf(usersByName.get(value.get())));
+                    value = Optional.of(usersByName.get(value.get()));
 
                 }
 
             }
 
-            if (value.isPresent()) {
-                csvLine.add(value.get());
-            } else {
-                csvLine.add("");
-            }
+            csvLine.add(value.orElse(""));
 
         }
+
+        csvLine.add(extractorMap.get(FieldType.STRING).extractAsString(project, "Name").orElse(""));
+        csvLine.add(extractorMap.get(FieldType.DECIMAL_NO_PRECISION).extractAsString(project, "Internal ID").orElse(""));
+
         return csvLine.toString();
     }
 

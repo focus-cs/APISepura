@@ -1,9 +1,8 @@
 package fr.sciforma.apietnic.business.processor;
 
-import com.sciforma.psnext.api.PSException;
 import com.sciforma.psnext.api.PortfolioFolder;
-import com.sciforma.psnext.api.Skill;
 import fr.sciforma.apietnic.business.csv.PortfolioFolderCsvHelper;
+import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
 import fr.sciforma.apietnic.business.provider.PortfolioFieldProvider;
 import fr.sciforma.apietnic.service.SciformaService;
@@ -31,9 +30,9 @@ public class PortfolioFolderProcessor extends AbstractSystemDataProcessor<Portfo
     @Autowired
     private PortfolioFolderCsvHelper csvHelper;
 
-    private Map<String, Integer> portfolioFolderByName;
+    private Map<String, String> portfolioFolderByName;
 
-    public Map<String, Integer> getPortfoliosByName(SciformaService sciformaService, Map<String, Integer> usersByName) {
+    public Map<String, String> getPortfoliosByName(SciformaService sciformaService, Map<String, String> usersByName) {
 
         Logger.info("Processing file " + getCsvHelper().getFilename());
 
@@ -51,16 +50,13 @@ public class PortfolioFolderProcessor extends AbstractSystemDataProcessor<Portfo
 
     }
 
-    private void parse(PortfolioFolder root, Map<String, Integer> usersByName) {
+    private void parse(PortfolioFolder root, Map<String, String> usersByName) {
 
         if (root.getParent() != null) {
             getCsvHelper().addLine(buildCsvLine(root, usersByName));
 
-            try {
-                portfolioFolderByName.putIfAbsent(root.toString(), Double.valueOf(root.getDoubleField("Internal ID")).intValue());
-            } catch (PSException e) {
-                Logger.error(e);
-            }
+            Optional<String> organizationIID = extractorMap.get(FieldType.DECIMAL_NO_PRECISION).extractAsString(root, "Internal ID");
+            organizationIID.ifPresent(s -> portfolioFolderByName.putIfAbsent(root.toString(), s));
         }
 
         List<PortfolioFolder> children = getChildren(root);
@@ -77,7 +73,7 @@ public class PortfolioFolderProcessor extends AbstractSystemDataProcessor<Portfo
 
     }
 
-    String buildCsvLine(PortfolioFolder fieldAccessor, Map<String, Integer> usersByName) {
+    String buildCsvLine(PortfolioFolder fieldAccessor, Map<String, String> usersByName) {
         StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
         for (SciformaField sciformaField : getFieldProvider().getFields()) {
@@ -97,7 +93,7 @@ public class PortfolioFolderProcessor extends AbstractSystemDataProcessor<Portfo
                     for (String manager : managers) {
 
                         if(usersByName.containsKey(manager)) {
-                            managersIds.add(String.valueOf(usersByName.get(manager)));
+                            managersIds.add(usersByName.get(manager));
                         }
 
                     }
@@ -112,11 +108,7 @@ public class PortfolioFolderProcessor extends AbstractSystemDataProcessor<Portfo
 
             }
 
-            if (value.isPresent()) {
-                csvLine.add(value.get());
-            } else {
-                csvLine.add("");
-            }
+            csvLine.add(value.orElse(""));
 
         }
         return csvLine.toString();

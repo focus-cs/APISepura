@@ -3,7 +3,6 @@ package fr.sciforma.apietnic.business.processor;
 import com.sciforma.psnext.api.LockException;
 import com.sciforma.psnext.api.PSException;
 import com.sciforma.psnext.api.Project;
-import com.sciforma.psnext.api.User;
 import fr.sciforma.apietnic.business.csv.ProjectCsvHelper;
 import fr.sciforma.apietnic.business.model.FieldType;
 import fr.sciforma.apietnic.business.model.SciformaField;
@@ -33,7 +32,7 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
     @Autowired
     private ProjectCsvHelper csvHelper;
 
-    public Map<Double, Project> process(SciformaService sciformaService, Map<String, Integer> usersByName, Map<String, Integer> portfoliosByName, Map<String, Integer> organizationByName) {
+    public Map<Double, Project> process(SciformaService sciformaService, Map<String, String> usersByName, Map<String, String> portfoliosByName, Map<String, String> organizationByName) {
 
         Logger.info("Processing file " + csvHelper.getFilename());
 
@@ -84,7 +83,7 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
     }
 
-    String buildCsvLine(Project fieldAccessor, Map<String, Integer> usersByName, Map<String, Integer> portfoliosByName, Map<String, Integer> organizationByName) {
+    String buildCsvLine(Project fieldAccessor, Map<String, String> usersByName, Map<String, String> portfoliosByName, Map<String, String> organizationByName) {
         StringJoiner csvLine = new StringJoiner(csvDelimiter);
 
         for (SciformaField sciformaField : fieldProvider.getFields()) {
@@ -97,7 +96,7 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
                 if (value.isPresent() && usersByName.containsKey(value.get())) {
 
-                    value = Optional.of(String.valueOf(usersByName.get(value.get())));
+                    value = Optional.of(usersByName.get(value.get()));
 
                 }
 
@@ -105,7 +104,7 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
                 if (value.isPresent() && portfoliosByName.containsKey(value.get())) {
 
-                    value = Optional.of(String.valueOf(portfoliosByName.get(value.get())));
+                    value = Optional.of(portfoliosByName.get(value.get()));
 
                 }
 
@@ -113,17 +112,13 @@ public class ProjectProcessor extends AbstractProcessor<Project> {
 
                 if (value.isPresent() && organizationByName.containsKey(value.get())) {
 
-                    value = Optional.of(String.valueOf(organizationByName.get(value.get())));
+                    value = Optional.of(organizationByName.get(value.get()));
 
                 }
 
             }
 
-            if (value.isPresent()) {
-                csvLine.add(value.get());
-            } else {
-                csvLine.add("");
-            }
+            csvLine.add(value.orElse(""));
 
         }
         return csvLine.toString();

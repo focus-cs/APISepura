@@ -22,6 +22,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StopWatch;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -71,6 +72,7 @@ public class APIEtnic {
             Logger.error(ex, "An error occured during execution");
 
         }
+
     }
 
     private void start() {
@@ -79,32 +81,53 @@ public class APIEtnic {
 
             if (sciformaService.createConnection()) {
 
-                Map<Double, Resource> resourcesById = resourceProcessor.getResourcesById(sciformaService);
+                StopWatch extractStopWatch = new StopWatch("API extraction process");
 
-                Map<Double, User> usersById = userProcessor.getUsersById(sciformaService, resourcesById);
+                extractStopWatch.start("Resources");
+                Map<String, Resource> resourcesById = resourceProcessor.getResourcesById(sciformaService);
 
-                Map<String, Integer> usersByName = getUsersByName(usersById);
+                Map<String, User> usersById = userProcessor.getUsersById(sciformaService, resourcesById);
+                extractStopWatch.stop();
 
-                Map<String, Integer> organizationByName = organizationProcessor.getOrganizationByName(sciformaService);
-//
-                Map<String, Integer> portfoliosByName = portfolioFolderProcessor.getPortfoliosByName(sciformaService, usersByName);
+                Map<String, String> usersByName = getUsersByName(usersById);
 
-//                Map<String, Skill> skillsByName = skillProcessor.getSkillsByName(sciformaService);
+                extractStopWatch.start("Organizations");
+                Map<String, String> organizationByName = organizationProcessor.getOrganizationByName(sciformaService);
+                extractStopWatch.stop();
 
-//                skillUserProcessor.process(skillsByName, usersById, resourcesById);
-//
-//                for (Map.Entry<Double, Resource> entry : resourcesById.entrySet()) {
-//                    timesheetProcessor.process(sciformaService, entry.getValue());
-//                }
-//
+                extractStopWatch.start("Portfolios");
+                Map<String, String> portfoliosByName = portfolioFolderProcessor.getPortfoliosByName(sciformaService, usersByName);
+                extractStopWatch.stop();
+
+                extractStopWatch.start("Skills");
+                Map<String, Skill> skillsByName = skillProcessor.getSkillsByName(sciformaService);
+                extractStopWatch.stop();
+
+                extractStopWatch.start("Skills/Users");
+                skillUserProcessor.process(skillsByName, usersById, resourcesById);
+                extractStopWatch.stop();
+
+                extractStopWatch.start("Job Classifications");
+                jobClassificationProcessor.process(sciformaService);
+                extractStopWatch.stop();
+
+                extractStopWatch.start("Timesheets");
+                for (Map.Entry<String, Resource> entry : resourcesById.entrySet()) {
+                    timesheetProcessor.process(sciformaService, entry.getValue());
+                }
+                extractStopWatch.stop();
+
+                extractStopWatch.start("Projects");
                 Map<Double, Project> projectsById = projectProcessor.process(sciformaService, usersByName, portfoliosByName, organizationByName);
-//
+                extractStopWatch.stop();
+
+                extractStopWatch.start("Tasks");
                 for (Map.Entry<Double, Project> entry : projectsById.entrySet()) {
                     taskProcessor.process(entry.getValue(), usersByName);
                 }
-//
-//                jobClassificationProcessor.process(sciformaService, usersByName);
+                extractStopWatch.stop();
 
+                Logger.info(extractStopWatch.prettyPrint());
 
             }
 
@@ -120,14 +143,14 @@ public class APIEtnic {
 
     }
 
-    private Map<String, Integer> getUsersByName(Map<Double, User> usersById) {
-        Map<String, Integer> usersByName = new HashMap<>();
+    private Map<String, String> getUsersByName(Map<String, User> usersById) {
+        Map<String, String> usersByName = new HashMap<>();
 
         try {
 
-            for (Map.Entry<Double, User> entry : usersById.entrySet()) {
+            for (Map.Entry<String, User> entry : usersById.entrySet()) {
 
-                usersByName.put(entry.getValue().getStringField("Name"), entry.getKey().intValue());
+                usersByName.put(entry.getValue().getStringField("Name"), entry.getKey());
 
             }
 

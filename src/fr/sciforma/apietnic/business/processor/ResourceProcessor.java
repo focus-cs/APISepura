@@ -23,17 +23,17 @@ public class ResourceProcessor extends AbstractFieldAccessorProcessor<Resource> 
     @Autowired
     private ResourceCsvHelper csvHelper;
 
-    public Map<Double, Resource> getResourcesById(SciformaService sciformaService) {
+    public Map<String, Resource> getResourcesById(SciformaService sciformaService) {
 
-        Map<Double, Resource> resourcesById = new HashMap<>();
+        Map<String, Resource> resourcesById = new HashMap<>();
 
         int cpt = 0;
 
         for (Resource resource : getFieldAccessors(sciformaService)) {
 
-            Optional<Double> internalId = (Optional<Double>) extractorMap.get(FieldType.DECIMAL).extract(resource, "Internal ID");
+            Optional<String> internalId = extractorMap.get(FieldType.DECIMAL_NO_PRECISION).extractAsString(resource, "Internal ID");
 
-            internalId.ifPresent(aDouble -> resourcesById.putIfAbsent(aDouble, resource));
+            internalId.ifPresent(iid -> resourcesById.putIfAbsent(iid, resource));
 
 //            cpt++;
 //            if (cpt > 5) {
