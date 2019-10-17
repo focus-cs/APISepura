@@ -6,10 +6,11 @@ import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.PostConstruct;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
@@ -86,13 +87,14 @@ public abstract class AbstractCsvHelper implements CsvHelper {
 
         String filePath = path + getFilename();
 
-        try (FileWriter fileWriter = new FileWriter(filePath, true)) {
+        try {
 
-            for (String csvLine : lines) {
-                fileWriter.append(csvLine).append("\n");
-            }
-
-            fileWriter.flush();
+            Files.write(
+                    Paths.get(filePath),
+                    lines,
+                    StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.APPEND);
 
             lines = new ArrayList<>();
 
