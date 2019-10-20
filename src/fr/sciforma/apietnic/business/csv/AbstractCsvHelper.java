@@ -77,7 +77,12 @@ public abstract class AbstractCsvHelper implements CsvHelper {
         StringJoiner headerAsString = new StringJoiner(delimiter);
 
         for (String header : getHeader()) {
-            headerAsString.add(header);
+            headerAsString.add(header
+                    .replace("é", "e")
+                    .replace("è", "e")
+                    .replace("à", "a")
+                    .replace("ç", "c")
+                    .replace("ù", "u"));
         }
 
         return headerAsString.toString();
