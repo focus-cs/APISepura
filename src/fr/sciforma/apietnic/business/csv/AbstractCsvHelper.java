@@ -39,6 +39,7 @@ public abstract class AbstractCsvHelper implements CsvHelper {
         }
 
         lines = new ArrayList<>();
+        lines.add(String.valueOf('\ufeff')); // Add BOM to the beginning of the CSV file to allow Excel to open it with special characters
         lines.add(getHeaderAsString());
     }
 
