@@ -11,9 +11,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.regex.Pattern;
 
 public abstract class AbstractCsvHelper implements CsvHelper {
 
@@ -21,6 +23,8 @@ public abstract class AbstractCsvHelper implements CsvHelper {
     final String FINISH_HEADER = "**Finish**";
 
     private static final int BATCH_SIZE = 200;
+
+    private static final Pattern pattern = Pattern.compile("[^\\p{ASCII}]");
 
     @Value("${csv.delimiter}")
     protected String delimiter;
@@ -39,7 +43,6 @@ public abstract class AbstractCsvHelper implements CsvHelper {
         }
 
         lines = new ArrayList<>();
-        lines.add(String.valueOf('\ufeff')); // Add BOM to the beginning of the CSV file to allow Excel to open it with special characters
         lines.add(getHeaderAsString());
     }
 
@@ -55,7 +58,9 @@ public abstract class AbstractCsvHelper implements CsvHelper {
 
     public void addLine(String line) {
 
-        lines.add(line);
+        line = Normalizer.normalize(line, Normalizer.Form.NFD);
+
+        lines.add(line.replaceAll(pattern.pattern(), ""));
 
         if (lines.size() >= BATCH_SIZE) {
             writeToFile();
@@ -78,12 +83,7 @@ public abstract class AbstractCsvHelper implements CsvHelper {
         StringJoiner headerAsString = new StringJoiner(delimiter);
 
         for (String header : getHeader()) {
-            headerAsString.add(header
-                    .replace("é", "e")
-                    .replace("è", "e")
-                    .replace("à", "a")
-                    .replace("ç", "c")
-                    .replace("ù", "u"));
+            headerAsString.add(header);
         }
 
         return headerAsString.toString();
