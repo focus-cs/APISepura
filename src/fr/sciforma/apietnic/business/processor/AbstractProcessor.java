@@ -136,7 +136,7 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
 
                     header.putIfAbsent(START_HEADER, sdf.format(datedData.get(0).getStart()));
                     header.putIfAbsent(FINISH_HEADER, sdf.format(datedData.get(0).getFinish()));
-                    header.put(sciformaField.getName(), String.valueOf(decimalFormat.format(datedData.get(0).getData())));
+                    header.put(sciformaField.getName(), decimalFormat.format(datedData.get(0).getData()).replace(",", "."));
 
                 }
 
@@ -151,7 +151,7 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
 
                     header.putIfAbsent(START_HEADER, sdf.format(datedData.get(0).getStart()));
                     header.putIfAbsent(FINISH_HEADER, sdf.format(datedData.get(0).getFinish()));
-                    header.put(sciformaField.getName(), datedData.get(0).getData());
+                    header.put(sciformaField.getName(), decimalFormat.format(datedData.get(0).getData()).replace(",", "."));
 
                 }
 
@@ -195,6 +195,7 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
     }
 
     public abstract FieldProvider getFieldProvider();
+
     public abstract CsvHelper getCsvHelper();
 
 }

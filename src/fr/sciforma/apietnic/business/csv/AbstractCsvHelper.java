@@ -43,7 +43,7 @@ public abstract class AbstractCsvHelper implements CsvHelper {
         }
 
         lines = new ArrayList<>();
-        lines.add(getHeaderAsString());
+        addLine(getHeaderAsString());
     }
 
     protected List<String> getHeader() {
