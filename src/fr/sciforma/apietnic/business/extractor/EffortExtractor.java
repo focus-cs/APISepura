@@ -8,6 +8,7 @@ import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -18,6 +19,8 @@ public class EffortExtractor implements Extractor<List<DoubleDatedData>> {
     @Value("${multivalue.delimiter}")
     protected String delimiter;
 
+    private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
+
     @Override
     public Optional<String> extractAsString(FieldAccessor fieldAccessor, String fieldName) {
 
@@ -26,7 +29,7 @@ public class EffortExtractor implements Extractor<List<DoubleDatedData>> {
         if (extract.isPresent()) {
             StringJoiner stringJoiner = new StringJoiner(delimiter);
             for (DoubleDatedData next : extract.get()) {
-                stringJoiner.add(String.valueOf(next.getData()));
+                stringJoiner.add(String.valueOf(decimalFormat.format(next.getData())));
             }
 
             return Optional.of(stringJoiner.toString());

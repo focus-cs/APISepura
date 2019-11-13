@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.PostConstruct;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -46,6 +47,8 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
 
     @Value("${csv.delimiter}")
     protected String csvDelimiter;
+
+    private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 
     @Autowired
     private StringExtractor stringExtractor;
@@ -133,7 +136,7 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
 
                     header.putIfAbsent(START_HEADER, sdf.format(datedData.get(0).getStart()));
                     header.putIfAbsent(FINISH_HEADER, sdf.format(datedData.get(0).getFinish()));
-                    header.put(sciformaField.getName(), String.valueOf(datedData.get(0).getData()));
+                    header.put(sciformaField.getName(), String.valueOf(decimalFormat.format(datedData.get(0).getData())));
 
                 }
 
@@ -148,7 +151,7 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
 
                     header.putIfAbsent(START_HEADER, sdf.format(datedData.get(0).getStart()));
                     header.putIfAbsent(FINISH_HEADER, sdf.format(datedData.get(0).getFinish()));
-                    header.put(sciformaField.getName(), String.valueOf(datedData.get(0).getData()));
+                    header.put(sciformaField.getName(), datedData.get(0).getData());
 
                 }
 

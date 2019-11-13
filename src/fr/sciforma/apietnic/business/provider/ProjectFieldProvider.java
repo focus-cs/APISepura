@@ -53,7 +53,6 @@ public class ProjectFieldProvider implements FieldProvider {
         fields.add(SciformaField.builder().name("Create Date").type(FieldType.DATE).build());
         fields.add(SciformaField.builder().name("Current Baseline").type(FieldType.INTEGER).build());
         fields.add(SciformaField.builder().name("Début réel").type(FieldType.DATE).build());
-        fields.add(SciformaField.builder().name("Description").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Duration").type(FieldType.DURATION).build());
         fields.add(SciformaField.builder().name("Ecart charge").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("Ecart début").type(FieldType.DURATION).build());

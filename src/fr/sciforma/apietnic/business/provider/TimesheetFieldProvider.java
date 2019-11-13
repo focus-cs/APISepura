@@ -24,7 +24,6 @@ public class TimesheetFieldProvider implements FieldProvider {
         fields.add(SciformaField.builder().name("Charge réelle (En cours)").type(FieldType.EFFORT).build());
         fields.add(SciformaField.builder().name("Charge réelle (Présentée)").type(FieldType.EFFORT).build());
         fields.add(SciformaField.builder().name("Charge réelle (Validée)").type(FieldType.EFFORT).build());
-        fields.add(SciformaField.builder().name("Daily Notes").type(FieldType.STRING_DATED).build());
         fields.add(SciformaField.builder().name("ID").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Name").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Project Name").type(FieldType.STRING).build());

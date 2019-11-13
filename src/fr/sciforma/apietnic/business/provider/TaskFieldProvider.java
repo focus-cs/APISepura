@@ -57,7 +57,6 @@ public class TaskFieldProvider implements FieldProvider {
         fields.add(SciformaField.builder().name("Actual Labor Effort").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("Baseline Labor Effort").type(FieldType.DECIMAL).build());
         fields.add(SciformaField.builder().name("Remaining Labor Effort").type(FieldType.DECIMAL).build());
-        fields.add(SciformaField.builder().name("Description").type(FieldType.STRING).build());
         fields.add(SciformaField.builder().name("Duration").type(FieldType.DURATION).build());
         fields.add(SciformaField.builder().name("Finish").type(FieldType.DATE).build());
         fields.add(SciformaField.builder().name("ID").type(FieldType.STRING).build());
