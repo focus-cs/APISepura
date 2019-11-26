@@ -22,8 +22,9 @@ public class StringExtractor implements Extractor<String> {
         try {
 
             return Optional.of(fieldAccessor.getStringField(fieldName)
-                    .replaceAll("\\r\\n|\\r|\\n", " ")
-                    .replaceAll(csvDelimiter, csvDelimiterReplaceWith));
+                    .replaceAll("\\r\\n|\\r|\\n|\\t", " ")
+                    .replaceAll(String.format("\\%s", csvDelimiter), csvDelimiterReplaceWith)
+                    .trim());
 
         } catch (PSException e) {
             Logger.error(e, "Failed to retrieve string value from field " + fieldName);
