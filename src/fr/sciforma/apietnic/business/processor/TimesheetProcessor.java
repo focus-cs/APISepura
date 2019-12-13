@@ -38,7 +38,7 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
 
         Date endOfYear = Date.from(LocalDate.now()
                 .withMonth(12)
-                .withDayOfYear(31)
+                .withDayOfMonth(31)
                 .atStartOfDay()
                 .atZone(ZoneId.systemDefault())
                 .toInstant());
