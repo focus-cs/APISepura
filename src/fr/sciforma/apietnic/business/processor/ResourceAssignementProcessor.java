@@ -43,7 +43,7 @@ public class ResourceAssignementProcessor extends AbstractProcessor<ResAssignmen
 
                 for (LocalDate localDate = startDate; localDate.isBefore(endDate); localDate = localDate.plusDays(1)) {
 
-                    buildTimeDistributedCsvLine(resAssignment, localDate).ifPresent(csvHelper::addLine);
+                    buildTimeDistributedCsvLine(resAssignment, localDate, false).ifPresent(csvHelper::addLine);
 
                 }
 

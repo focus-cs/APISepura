@@ -10,6 +10,7 @@ import fr.sciforma.apietnic.service.SciformaService;
 import lombok.Getter;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -22,6 +23,9 @@ import java.util.Optional;
 @Getter
 public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
 
+    @Value("${timesheet.yearfrom}")
+    protected String timesheetYear;
+
     @Autowired
     private TimesheetFieldProvider fieldProvider;
     @Autowired
@@ -29,14 +33,30 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
 
     public void process(SciformaService sciformaService, Resource resource) {
 
-        Date startOfYear = Date.from(LocalDate.now()
+        Date startOfYear;
+        Date endOfYear;
+
+        Integer year = LocalDate.now().getYear();
+
+        if (timesheetYear.length() == 4) {
+
+            try {
+                year = Integer.valueOf(timesheetYear);
+            } catch (NumberFormatException e) {
+                Logger.error(e, "Failed to parse date " + timesheetYear);
+            }
+
+        }
+
+        startOfYear = Date.from(LocalDate.now()
+                .withYear(year)
                 .withMonth(1)
                 .withDayOfYear(1)
                 .atStartOfDay()
                 .atZone(ZoneId.systemDefault())
                 .toInstant());
 
-        Date endOfYear = Date.from(LocalDate.now()
+        endOfYear = Date.from(LocalDate.now()
                 .withMonth(12)
                 .withDayOfMonth(31)
                 .atStartOfDay()
@@ -63,7 +83,7 @@ public class TimesheetProcessor extends AbstractProcessor<TimesheetAssignment> {
 
                     for (LocalDate localDate = startDate; localDate.isBefore(endDate); localDate = localDate.plusDays(1)) {
 
-                        buildTimeDistributedCsvLine(timesheetAssignment, localDate).ifPresent(csvHelper::addLine);
+                        buildTimeDistributedCsvLine(timesheetAssignment, localDate, true).ifPresent(csvHelper::addLine);
 
                     }
 

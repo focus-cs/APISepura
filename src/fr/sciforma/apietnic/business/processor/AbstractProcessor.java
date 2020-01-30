@@ -116,7 +116,7 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
         return csvLine.toString();
     }
 
-    Optional<String> buildTimeDistributedCsvLine(T distributedValue, LocalDate localDate) throws PSException {
+    Optional<String> buildTimeDistributedCsvLine(T distributedValue, LocalDate localDate, boolean skipZeroActualEffort) throws PSException {
         Map<String, String> header = new HashMap<>();
 
         for (String headerItem : getCsvHelper().getHeaderAsList()) {
@@ -162,7 +162,7 @@ public abstract class AbstractProcessor<T extends FieldAccessor> {
             }
         }
 
-        if (header.containsKey(ACTUAL_EFFORT) && header.get(ACTUAL_EFFORT) != null && Double.valueOf(header.get(ACTUAL_EFFORT)) > 0) {
+        if (header.containsKey(ACTUAL_EFFORT) && header.get(ACTUAL_EFFORT) != null && (Double.valueOf(header.get(ACTUAL_EFFORT)) > 0 || !skipZeroActualEffort)) {
 
             if (header.get(START_HEADER) != null && !header.get(START_HEADER).isEmpty()) {
 
