@@ -1,17 +1,17 @@
 <project xmlns:ivy="antlib:org.apache.ivy.ant"
-         name="APIEtnicExtract" default="main" basedir=".">
+         name="APISepura" default="main" basedir=".">
   <description>
     Create a Java Project (JAR) with Ant build script
   </description>
 
-  <property name="projectName" value="APIEtnicExtract" />
+  <property name="projectName" value="APISepura" />
   <property name="src.dir" location="src" />
   <property name="build.dir" location="bin" />
   <property name="dist.dir" location="dist" />
   <property name="dist.lib.dir" location="dist/lib" />
   <property name="lib.dir" value="lib" />
   <property name="distribution.dir" location="distribution"/>
-  <property name="main-class" value="fr.sciforma.apietnic.APIEtnic" />
+  <property name="main-class" value="fr.sciforma.apisepura.APISepura" />
 
   <property name="ivy.install.version" value="2.4.0"/>
   <property name="ivy.jar.dir" value="${basedir}/ivy"/>
