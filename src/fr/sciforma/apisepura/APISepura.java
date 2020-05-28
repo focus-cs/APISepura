@@ -14,7 +14,6 @@ import com.sciforma.psnext.api.TimesheetAssignment;
 import com.sciforma.psnext.mywork.SampleTimesheet;
 import fr.sciforma.apisepura.business.csv.CsvHelper;
 import fr.sciforma.apisepura.business.enums.LogLevel;
-import fr.sciforma.apisepura.business.exception.TimesheetLockException;
 import fr.sciforma.apisepura.business.helper.ProjectHelper;
 import fr.sciforma.apisepura.business.helper.ResourceHelper;
 import fr.sciforma.apisepura.business.model.AggregatedTimesheet;
@@ -29,7 +28,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.util.StopWatch;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,6 +57,8 @@ public class APISepura {
     private String defaultTaskName;
 
     private Global global;
+
+    private Date lockDate;
 
     public static void main(String[] args) {
 
@@ -119,87 +122,15 @@ public class APISepura {
                     }
                     extractStopWatch.stop();
 
+                    extractStopWatch.start("Clearing timesheets");
+                    clearTimesheets(sepuraTimesheets, resourceHelper);
+                    extractStopWatch.stop();
+
                     extractStopWatch.start("Processing timesheets");
-                    for (Map.Entry<String, SortedMap<LocalDateTime, List<AggregatedTimesheet>>> userNameEntry : sepuraTimesheets.entrySet()) {
-
-                        Optional<Resource> resource = resourceHelper.findResource(userNameEntry.getKey());
-                        if (resource.isPresent()) {
-
-                            String resourceName = resource.get().getStringField("Name");
-
-                            for (Map.Entry<LocalDateTime, List<AggregatedTimesheet>> dateEntry : userNameEntry.getValue().entrySet()) {
-
-                                Optional<Timesheet> sciformaTimesheet = findTimesheet(resource.get(), dateEntry.getKey());
-                                if (sciformaTimesheet.isPresent()) {
-
-                                    if (sciformaTimesheet.get().getStatus() != Timesheet.STATUS_SUBMITTED
-                                            && sciformaTimesheet.get().getStatus() != Timesheet.STATUS_REVIEWED
-                                            && sciformaTimesheet.get().getStatus() != Timesheet.STATUS_APPROVED
-                                            && sciformaTimesheet.get().getStatus() != Timesheet.STATUS_LOCKED
-//                                                && sciformaTimesheet.get().getStatus() != Timesheet.STATUS_REWORK
-                                    ) {
-
-                                        Logger.info("Clearing timesheet for user: [" + resource.get().getStringField("Name") + "] and date " + dateEntry.getKey());
-                                        sciformaTimesheet = clearTimesheet(sciformaTimesheet.get(), resource.get(), dateEntry.getKey());
-
-                                        AggregatedTimesheet defaultTimesheet = AggregatedTimesheet.builder()
-                                                .parentSdcr(defaultProjectName)
-                                                .projectCode(defaultProjectName)
-                                                .startDate(dateEntry.getKey())
-                                                .userName(resourceName)
-                                                .datedDataList(new ArrayList<>())
-                                                .build();
-
-                                        for (AggregatedTimesheet aggregatedTimesheet : dateEntry.getValue()) {
-
-                                            Optional<Project> project = projectHelper.findProject(aggregatedTimesheet.getProjectCode());
-                                            if (project.isPresent()) {
-
-                                                String projectName = project.get().getStringField("Name");
-
-                                                Optional<Task> task = projectHelper.findTask(aggregatedTimesheet.getParentSdcr(), project.get());
-                                                if (task.isPresent()) {
-
-                                                    if (task.get().getBooleanField("Closed")) {
-                                                        log("ER2 - Task [" + aggregatedTimesheet.getParentSdcr() + "] is closed in project [" + projectName + "] - using default task [" + defaultTaskName + "]", LogLevel.ERROR);
-                                                        defaultTimesheet.addDatedDatas(aggregatedTimesheet.getDatedDataList());
-                                                    } else {
-                                                        processTimesheet(aggregatedTimesheet, sciformaTimesheet.get(), task.get(), resourceName, projectName);
-                                                    }
-
-                                                } else {
-                                                    log("ER2 - Task [" + aggregatedTimesheet.getParentSdcr() + "] not found in project [" + projectName + "] - using default task [" + defaultTaskName + "]", LogLevel.ERROR);
-                                                    defaultTimesheet.addDatedDatas(aggregatedTimesheet.getDatedDataList());
-                                                }
-
-                                            } else {
-                                                log("ER1 - Project [" + aggregatedTimesheet.getProjectCode() + "] not found or not published - using default project [" + defaultProjectName + "]", LogLevel.ERROR);
-                                                defaultTimesheet.addDatedDatas(aggregatedTimesheet.getDatedDataList());
-                                            }
-
-                                        }
-
-                                        processDefaultedTimesheets(sciformaTimesheet.get(), defaultTask.get(), resourceName, defaultTimesheet);
-
-                                        sciformaTimesheet.get().save();
-
-                                    } else {
-                                        log("ER4 - Timesheet is submitted, reviewed, approved or locked", LogLevel.ERROR);
-                                    }
-
-                                } else {
-                                    log("ER4 - Timesheet not found", LogLevel.ERROR);
-                                }
-                            }
-
-                        } else {
-                            log("ER3 - Resource [" + userNameEntry.getKey() + "] not found", LogLevel.ERROR);
-                        }
-                    }
+                    fillTimesheets(sepuraTimesheets, resourceHelper, projectHelper, defaultTask.get());
+                    extractStopWatch.stop();
 
                     csvHelper.renameFiles();
-
-                    extractStopWatch.stop();
 
                 }
 
@@ -225,13 +156,119 @@ public class APISepura {
 
     }
 
-    private void processDefaultedTimesheets(Timesheet sciformaTimesheet, Task defaultTask, String resourceName, AggregatedTimesheet defaultTimesheets) {
+    private void fillTimesheets(SortedMap<String, SortedMap<LocalDateTime, List<AggregatedTimesheet>>> sepuraTimesheets, ResourceHelper resourceHelper, ProjectHelper projectHelper, Task defaultTask) throws PSException {
+        for (Map.Entry<String, SortedMap<LocalDateTime, List<AggregatedTimesheet>>> userNameEntry : sepuraTimesheets.entrySet()) {
 
-        if (!defaultTimesheets.getDatedDataList().isEmpty()) {
-            log("Processing default timesheet", LogLevel.INFO);
-            processTimesheet(defaultTimesheets, sciformaTimesheet, defaultTask, resourceName, defaultProjectName);
+            Optional<Resource> resource = resourceHelper.findResource(userNameEntry.getKey());
+            if (resource.isPresent()) {
+
+                String resourceName = resource.get().getStringField("Name");
+
+                for (Map.Entry<LocalDateTime, List<AggregatedTimesheet>> dateEntry : userNameEntry.getValue().entrySet()) {
+
+                    Optional<Timesheet> sciformaTimesheet = findTimesheet(resource.get(), dateEntry.getKey());
+                    if (sciformaTimesheet.isPresent()) {
+
+                        if (sciformaTimesheet.get().getStatus() != Timesheet.STATUS_SUBMITTED
+                                && sciformaTimesheet.get().getStatus() != Timesheet.STATUS_REVIEWED
+                                && sciformaTimesheet.get().getStatus() != Timesheet.STATUS_APPROVED
+                                && sciformaTimesheet.get().getStatus() != Timesheet.STATUS_LOCKED
+                        ) {
+
+                            AggregatedTimesheet defaultTimesheet = AggregatedTimesheet.builder()
+                                    .parentSdcr(defaultProjectName)
+                                    .projectCode(defaultProjectName)
+                                    .startDate(dateEntry.getKey())
+                                    .userName(resourceName)
+                                    .datedDataList(new ArrayList<>())
+                                    .build();
+
+                            for (AggregatedTimesheet aggregatedTimesheet : dateEntry.getValue()) {
+
+                                Optional<Project> project = projectHelper.findProject(aggregatedTimesheet.getProjectCode());
+                                if (project.isPresent()) {
+
+                                    String projectName = project.get().getStringField("Name");
+
+                                    Optional<Task> task = projectHelper.findTask(aggregatedTimesheet.getParentSdcr(), project.get());
+                                    if (task.isPresent()) {
+
+                                        if (task.get().getBooleanField("Closed")) {
+                                            log("ER2 - Task [" + aggregatedTimesheet.getParentSdcr() + "] is closed in project [" + projectName + "] - using default task [" + defaultTaskName + "]", LogLevel.ERROR);
+                                            defaultTimesheet.addDatedDatas(aggregatedTimesheet.getDatedDataList());
+                                        } else {
+                                            processTimesheet(aggregatedTimesheet, sciformaTimesheet.get(), task.get(), resourceName, projectName);
+                                        }
+
+                                    } else {
+                                        log("ER2 - Task [" + aggregatedTimesheet.getParentSdcr() + "] not found in project [" + projectName + "] - using default task [" + defaultTaskName + "]", LogLevel.ERROR);
+                                        defaultTimesheet.addDatedDatas(aggregatedTimesheet.getDatedDataList());
+                                    }
+
+                                } else {
+                                    log("ER1 - Project [" + aggregatedTimesheet.getProjectCode() + "] not found or not published - using default project [" + defaultProjectName + "]", LogLevel.ERROR);
+                                    defaultTimesheet.addDatedDatas(aggregatedTimesheet.getDatedDataList());
+                                }
+
+                            }
+
+                            if (!defaultTimesheet.getDatedDataList().isEmpty()) {
+                                log("Processing default timesheet", LogLevel.INFO);
+                                processTimesheet(defaultTimesheet, sciformaTimesheet.get(), defaultTask, resourceName, defaultProjectName);
+                            }
+
+                            sciformaTimesheet.get().save();
+
+                        } else {
+                            log("ER4 - Timesheet is submitted, reviewed, approved or locked", LogLevel.ERROR);
+                        }
+
+                    } else {
+                        log("ER4 - Timesheet not found", LogLevel.ERROR);
+                    }
+                }
+
+            } else {
+                log("ER3 - Resource [" + userNameEntry.getKey() + "] not found", LogLevel.ERROR);
+            }
         }
+    }
 
+    private void clearTimesheets(SortedMap<String, SortedMap<LocalDateTime, List<AggregatedTimesheet>>> sepuraTimesheets, ResourceHelper resourceHelper) throws PSException {
+        for (Map.Entry<String, SortedMap<LocalDateTime, List<AggregatedTimesheet>>> userNameEntry : sepuraTimesheets.entrySet()) {
+
+            Optional<Resource> resource = resourceHelper.findResource(userNameEntry.getKey());
+            if (resource.isPresent()) {
+
+                for (Map.Entry<LocalDateTime, List<AggregatedTimesheet>> dateEntry : userNameEntry.getValue().entrySet()) {
+
+                    // This has been implemented to prevent a very strange bahavior when clearing a timesheet ending with the last sunday of march (switch to summer time)
+                    // If this is the case we have to clear the sunday using "setDatedData(ACTUAL_EFFORT, null)" instead of using the method "clearDatedData"
+                    if (containsLastSundayOfMonth(dateEntry.getKey(), Month.MARCH)) {
+                        LocalDateTime lastSundayOfMonth = findLastSundayOfMonth(dateEntry.getKey().getYear(), Month.MARCH);
+                        Optional<Timesheet> lastSundayOfMarchTimesheet = findTimesheet(resource.get(), lastSundayOfMonth, lastSundayOfMonth.plusHours(1));
+                        if (lastSundayOfMarchTimesheet.isPresent()) {
+                            clearTimesheet(lastSundayOfMarchTimesheet.get(), false);
+                        }
+
+                        Optional<Timesheet> sciformaTimesheet = findTimesheet(resource.get(), dateEntry.getKey());
+                        if (sciformaTimesheet.isPresent()) {
+                            Logger.info("Clearing timesheet for user: [" + resource.get().getStringField("Name") + "] and date " + dateEntry.getKey());
+                            clearTimesheet(sciformaTimesheet.get(), false);
+                        }
+
+                    } else {
+
+                        Optional<Timesheet> sciformaTimesheet = findTimesheet(resource.get(), dateEntry.getKey());
+                        if (sciformaTimesheet.isPresent()) {
+                            Logger.info("Clearing timesheet for user: [" + resource.get().getStringField("Name") + "] and date " + dateEntry.getKey());
+                            clearTimesheet(sciformaTimesheet.get(), true);
+                        }
+
+                    }
+                }
+            }
+        }
     }
 
     private void saveAndUnlockGlobal() {
@@ -275,8 +312,13 @@ public class APISepura {
         }
     }
 
-    private Optional<Timesheet> clearTimesheet(Timesheet sciformaTimesheet, Resource resource, LocalDateTime dateTime) {
-        try {
+    private void clearTimesheet(Timesheet sciformaTimesheet, boolean clearDatedData) throws PSException {
+
+        if (sciformaTimesheet.getStatus() != Timesheet.STATUS_SUBMITTED
+                && sciformaTimesheet.getStatus() != Timesheet.STATUS_REVIEWED
+                && sciformaTimesheet.getStatus() != Timesheet.STATUS_APPROVED
+                && sciformaTimesheet.getStatus() != Timesheet.STATUS_LOCKED
+        ) {
 
             List<TimesheetAssignment> timesheetAssignmentList = sciformaTimesheet.getTimesheetAssignmentList();
 
@@ -284,36 +326,53 @@ public class APISepura {
 
                 for (TimesheetAssignment timesheetAssignment : timesheetAssignmentList) {
 
-                    List<DatedData> actualEffort = timesheetAssignment.getDatedData(ACTUAL_EFFORT);
+                    List<DatedData> actualEffort = null;
+                    try {
+                        actualEffort = timesheetAssignment.getDatedData(ACTUAL_EFFORT);
+                    } catch (PSException e) {
+                        Logger.error("Failed to retrieve dated data for [" + ACTUAL_EFFORT + "]");
+                        Logger.error(e);
+                    }
 
-                    for (DatedData datedData : actualEffort) {
+                    if (actualEffort != null) {
 
-                        try {
-                            // trying to add a dummy assignment to check if the timesheet is locked or not. Couldn't rely on timesheet assignment status as it would be anything but locked
-                            timesheetAssignment.updateDatedData(ACTUAL_EFFORT, Collections.singletonList(new DoubleDatedData(0, datedData.getStart(), datedData.getFinish())));
-                            timesheetAssignment.clearDatedData(ACTUAL_EFFORT, datedData.getStart(), datedData.getFinish());
-                        } catch (PSException e) {
-                            if (e.getCause() instanceof SampleTimesheet.LockException) {
-                                log("Timesheet is locked for date " + datedData.getStart(), LogLevel.INFO);
+                        for (DatedData datedData : actualEffort) {
+
+                            try {
+                                // trying to add a dummy assignment to check if the timesheet is locked or not. Couldn't rely on timesheet assignment status as it would be anything but locked
+                                timesheetAssignment.updateDatedData(ACTUAL_EFFORT, Collections.singletonList(new DoubleDatedData(0, datedData.getStart(), datedData.getFinish())));
+                                if (clearDatedData) {
+                                    timesheetAssignment.clearDatedData(ACTUAL_EFFORT, datedData.getStart(), datedData.getFinish());
+                                } else {
+                                    timesheetAssignment.setDatedData(ACTUAL_EFFORT, null);
+                                }
+                            } catch (PSException e) {
+                                if (e.getCause() instanceof SampleTimesheet.LockException) {
+                                    log("Timesheet is locked for date " + datedData.getStart(), LogLevel.INFO);
+                                    lockDate = datedData.getStart();
+                                }
                             }
+
                         }
 
                     }
 
                 }
 
-                sciformaTimesheet.save();
+                try {
 
-                return findTimesheet(resource, dateTime);
+                    sciformaTimesheet.save();
+
+                } catch (PSException e) {
+                    Logger.error("Failed to save timesheet");
+                    Logger.error(e);
+                }
 
             }
-
-        } catch (PSException e) {
-            Logger.error("Failed to clear timesheet");
-            Logger.error(e);
+        } else {
+            log("ER4 - Timesheet is submitted, reviewed, approved or locked", LogLevel.ERROR);
         }
 
-        return Optional.of(sciformaTimesheet);
     }
 
     private void processTimesheet(AggregatedTimesheet aggregatedTimesheet, Timesheet sciformaTimesheet, Task task, String resourceName, String projectName) {
@@ -321,20 +380,23 @@ public class APISepura {
         try {
             String taskName = task.getStringField("Name");
 
+            List<DoubleDatedData> notLockedData = new ArrayList<>();
+
             for (DoubleDatedData doubleDatedData : aggregatedTimesheet.getDatedDataList()) {
                 log("Applying timesheet - Date: " + doubleDatedData.getStart() + " - Time: " + doubleDatedData.getData() + " hours - User: " + resourceName + " - Task: " + taskName + " - Project: " + projectName, LogLevel.INFO);
 
-                try {
-                    TimesheetAssignment timesheetAssignment = sciformaTimesheet.addAssignment(task);
-                    timesheetAssignment.updateDatedData(ACTUAL_EFFORT, aggregatedTimesheet.getDatedDataList());
-                } catch (PSException e) {
-                    if (e.getCause() instanceof SampleTimesheet.LockException) {
-                        log("ER4 - Timesheet is locked for date " + doubleDatedData.getStart(), LogLevel.ERROR);
-                    } else {
-                        Logger.error(e);
-                    }
+                if (isDateBeforeOrEqualLockDate(doubleDatedData.getStart())) {
+                    log("ER4 - Timesheet is locked for date " + doubleDatedData.getStart(), LogLevel.ERROR);
+                } else {
+
+                    notLockedData.add(doubleDatedData);
+
                 }
+
             }
+
+            TimesheetAssignment timesheetAssignment = sciformaTimesheet.addAssignment(task);
+            timesheetAssignment.updateDatedData(ACTUAL_EFFORT, notLockedData);
 
         } catch (PSException e) {
 
@@ -384,6 +446,68 @@ public class APISepura {
 
     private Date toUtcDate(LocalDateTime date) {
         return Date.from(date.atZone(ZoneId.of("UTC")).toInstant());
+    }
+
+    private boolean isDateBeforeOrEqualLockDate(Date date) {
+
+        if (lockDate == null) {
+            return false;
+        }
+
+        LocalDateTime lockDateTime = lockDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+                .atStartOfDay();
+
+        LocalDateTime dateTime = date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+                .atStartOfDay();
+
+        return dateTime.isBefore(lockDateTime) || dateTime.equals(lockDateTime);
+
+    }
+
+    private boolean containsLastSundayOfMonth(LocalDateTime date, Month month) {
+
+        if (date.getMonth() != month) {
+            return false;
+        }
+
+        LocalDateTime lastSundayOfMonth = findLastSundayOfMonth(date.getYear(), month);
+
+        date = date.withHour(0);
+
+        if (date.getDayOfWeek().equals(DayOfWeek.MONDAY)) {
+            return date.plusDays(6).equals(lastSundayOfMonth);
+        } else if (date.getDayOfWeek().equals(DayOfWeek.TUESDAY)) {
+            return date.plusDays(5).equals(lastSundayOfMonth);
+        } else if (date.getDayOfWeek().equals(DayOfWeek.WEDNESDAY)) {
+            return date.plusDays(4).equals(lastSundayOfMonth);
+        } else if (date.getDayOfWeek().equals(DayOfWeek.THURSDAY)) {
+            return date.plusDays(3).equals(lastSundayOfMonth);
+        } else if (date.getDayOfWeek().equals(DayOfWeek.FRIDAY)) {
+            return date.plusDays(2).equals(lastSundayOfMonth);
+        } else if (date.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+            return date.plusDays(1).equals(lastSundayOfMonth);
+        } else if (date.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+            return date.equals(lastSundayOfMonth);
+        }
+
+        return false;
+    }
+
+    private LocalDateTime findLastSundayOfMonth(int year, Month month) {
+
+        LocalDateTime ldt = LocalDateTime.of(year, month, month.maxLength(), 0, 0, 0);
+
+        for (LocalDateTime localDateTime = ldt; localDateTime.isAfter(ldt.minusDays(7)); localDateTime = localDateTime.minusDays(1)) {
+            if (localDateTime.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+                return localDateTime;
+            }
+        }
+
+        return ldt;
     }
 
 }

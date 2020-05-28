@@ -187,8 +187,8 @@ public class CsvHelperImpl implements CsvHelper {
 
                 try {
 
-                    startDate = LocalDateTime.parse(splittedLine[4], dateTimeFormatter).withHour(8).withMinute(0).withSecond(0);
-                    endDate = startDate.plusHours(10);
+                    startDate = LocalDateTime.parse(splittedLine[4], dateTimeFormatter).withHour(5).withMinute(0).withSecond(0);
+                    endDate = startDate.plusHours(15);
 
                 } catch (DateTimeParseException e) {
                     throw new CsvException("Failed to parse date : " + splittedLine[4], e);
